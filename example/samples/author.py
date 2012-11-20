@@ -23,7 +23,7 @@ class Author(Document):
         'gender': Gender,
         'email': EmailField,
         'publisher': Publisher, # kind of foreign key
-        'books': [Book], # 1-to-many
+        'books': [Book], # 1-to-many, or many-to-many? some-to-some.. :)
         'has_book': bool,
         'age': int,
         'birthday': datetime.date,
