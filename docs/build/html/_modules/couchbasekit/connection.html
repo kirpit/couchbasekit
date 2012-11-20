@@ -1,0 +1,191 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>couchbasekit.connection &mdash; couchbasekit 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="couchbasekit 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">couchbasekit 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for couchbasekit.connection</h1><div class="highlight"><pre>
+<span class="c">#! /usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    couchbasekit.connection</span>
+<span class="sd">    ~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="sd">    :website: http://github.com/kirpit/couchbasekit</span>
+<span class="sd">    :copyright: Copyright 2012, Roy Enjoy &lt;kirpit *at* gmail.com&gt;, see AUTHORS.</span>
+<span class="sd">    :license: MIT, see LICENSE for details.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">couchbase</span> <span class="kn">import</span> <span class="n">Couchbase</span>
+<span class="kn">from</span> <span class="nn">couchbasekit.errors</span> <span class="kn">import</span> <span class="n">CredentialsNotSetError</span>
+
+
+<div class="viewcode-block" id="Connection"><a class="viewcode-back" href="../../api-documentation.html#couchbasekit.connection.Connection">[docs]</a><span class="k">class</span> <span class="nc">Connection</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is the singleton pattern for handling couchbase connections</span>
+<span class="sd">    application-wide.</span>
+
+<span class="sd">    Simply set your authentication credentials at the beginning of your</span>
+<span class="sd">    application (such as in &quot;settings.py&quot;) by:</span>
+
+<span class="sd">    &gt;&gt;&gt; from couchbasekit import Connection</span>
+<span class="sd">    &gt;&gt;&gt; Connection.auth(&#39;theusername&#39;, &#39;p@ssword&#39;)</span>
+
+<span class="sd">    or</span>
+
+<span class="sd">    &gt;&gt;&gt; Connection.auth(</span>
+<span class="sd">    ...     username=&#39;theusername&#39;, password=&#39;p@ssword&#39;,</span>
+<span class="sd">    ...     server=&#39;localhost&#39;, port=&#39;8091&#39;, # default already</span>
+<span class="sd">    ... )</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">       This class is not intended to create instances, so don&#39;t try to do:</span>
+
+<span class="sd">       &gt;&gt;&gt; conn = Connection() # wrong</span>
+
+<span class="sd">       or you will get a :exc:`RuntimeWarning`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">server</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">connection</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s">&#39;Connection class is not intended to create instances.&#39;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Connection.auth"><a class="viewcode-back" href="../../api-documentation.html#couchbasekit.connection.Connection.auth">[docs]</a>    <span class="k">def</span> <span class="nf">auth</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">server</span><span class="o">=</span><span class="s">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s">&#39;8091&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the couchbase connection credentials, globally.</span>
+
+<span class="sd">        :param username: bucket username (or &quot;Administrator&quot; for working with</span>
+<span class="sd">            multi buckets).</span>
+<span class="sd">        :type username: str</span>
+<span class="sd">        :param password: bucket password (or Administrator&#39;s password for</span>
+<span class="sd">            working with multi buckets).</span>
+<span class="sd">        :type password: str</span>
+<span class="sd">        :param server: couchbase server to connect, defaults to &quot;localhost&quot;.</span>
+<span class="sd">        :type server: str</span>
+<span class="sd">        :param port: couchbase server port, defaults to &quot;8091&quot;.</span>
+<span class="sd">        :type port: str</span>
+<span class="sd">        :returns: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="s">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">server</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Connection.bucket"><a class="viewcode-back" href="../../api-documentation.html#couchbasekit.connection.Connection.bucket">[docs]</a>    <span class="k">def</span> <span class="nf">bucket</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">bucket</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gives the bucket from couchbase server.</span>
+
+<span class="sd">        :param bucket: Bucket name to fetch.</span>
+<span class="sd">        :type bucket: str</span>
+<span class="sd">        :returns: couchbase driver&#39;s Bucket object.</span>
+<span class="sd">        :rtype: :class:`couchbase.client.Bucket`</span>
+<span class="sd">        :raises: :exc:`couchbasekit.errors.CredentialsNotSetError` If the</span>
+<span class="sd">            credentials wasn&#39;t set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">username</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">cls</span><span class="o">.</span><span class="n">password</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">CredentialsNotSetError</span><span class="p">()</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">Couchbase</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">bucket</span><span class="p">(</span><span class="n">bucket</span><span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Connection.close"><a class="viewcode-back" href="../../api-documentation.html#couchbasekit.connection.Connection.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Closes the current connection, which would be useful to ensure that</span>
+<span class="sd">        no orphan couchbase processes are left. Use it in, for example one of</span>
+<span class="sd">        your Django middleware&#39;s :meth:`process_response`.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">           The class will open a new connection if a bucket is requested even</span>
+<span class="sd">           though its connection was closed already.</span>
+
+<span class="sd">        :returns: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span> <span class="n">cls</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">done</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span> <span class="k">pass</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="bp">None</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">couchbasekit 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Roy Enjoy (aka &#39;kirpit&#39;).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

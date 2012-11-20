@@ -1,0 +1,530 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>couchbasekit.schema &mdash; couchbasekit 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="couchbasekit 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">couchbasekit 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for couchbasekit.schema</h1><div class="highlight"><pre>
+<span class="c">#! /usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    couchbasekit.schema</span>
+<span class="sd">    ~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="sd">    :website: http://github.com/kirpit/couchbasekit</span>
+<span class="sd">    :copyright: Copyright 2012, Roy Enjoy &lt;kirpit *at* gmail.com&gt;, see AUTHORS.</span>
+<span class="sd">    :license: MIT, see LICENSE for details.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">dateutil.parser</span> <span class="kn">import</span> <span class="n">parse</span>
+<span class="kn">from</span> <span class="nn">couchbasekit.fields</span> <span class="kn">import</span> <span class="n">CustomField</span>
+<span class="kn">from</span> <span class="nn">couchbasekit.errors</span> <span class="kn">import</span> <span class="n">StructureError</span>
+
+
+<span class="n">ALLOWED_TYPES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="nb">bool</span><span class="p">,</span>
+    <span class="nb">int</span><span class="p">,</span>
+    <span class="nb">long</span><span class="p">,</span>
+    <span class="nb">float</span><span class="p">,</span>
+    <span class="nb">unicode</span><span class="p">,</span>
+    <span class="nb">basestring</span><span class="p">,</span>
+    <span class="nb">list</span><span class="p">,</span>
+    <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+    <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
+    <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+<span class="p">)</span>
+
+<div class="viewcode-block" id="SchemaDocument"><a class="viewcode-back" href="../../api-documentation.html#couchbasekit.schema.SchemaDocument">[docs]</a><span class="k">class</span> <span class="nc">SchemaDocument</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Schema document class that handles validations and restoring raw</span>
+<span class="sd">    couchbase documents into Python values as defined in model documents.</span>
+
+<span class="sd">    Under normal circumstances, you don&#39;t use or inherit this class at all,</span>
+<span class="sd">    because it is only being used by :class:`couchbasekit.document.Document`</span>
+<span class="sd">    class.</span>
+
+<span class="sd">    :param seq: Document data to store at initialization, defaults to None.</span>
+<span class="sd">    :type seq: dict</span>
+<span class="sd">    :raises: :exc:`couchbasekit.errors.StructureError` if the minimum</span>
+<span class="sd">        structure requirements wasn&#39;t satisfied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
+    <span class="n">StructureError</span> <span class="o">=</span> <span class="n">StructureError</span>
+    <span class="n">__bucket_name__</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">__key_field__</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">doc_type</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">structure</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">default_values</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">required_fields</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+    <span class="n">is_new_record</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c"># check the required attributes</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bucket_name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> \
+           <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">doc_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> \
+           <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s">&#39;Structure is not properly set &#39;</span>
+                                          <span class="s">&#39;for </span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="c"># check self.__key_field__ if correct</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__key_field__</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__key_field__</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span>
+                <span class="n">msg</span><span class="o">=</span><span class="s">&#39;Document key field must be within the structure, &#39;</span>
+                    <span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; is given.&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__key_field__</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="c"># insert doc_type into the structure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">doc_type</span><span class="o">=</span><span class="nb">basestring</span><span class="p">)</span>
+        <span class="n">seq</span> <span class="o">=</span> <span class="n">seq</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SchemaDocument</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_convert_dict_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">mapping</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts the given mapping against the given structure, recursively.</span>
+<span class="sd">        This is quite code duplicate for :meth:`__getitem__` function.</span>
+
+<span class="sd">        :type structure: dict</span>
+<span class="sd">        :type mapping: dict</span>
+<span class="sd">        :returns: Converted dictionary.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">skey</span><span class="p">,</span> <span class="n">svalue</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="c"># this is a type:type structure</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">skey</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+                <span class="n">mkeys</span><span class="p">,</span> <span class="n">mvalues</span> <span class="o">=</span> <span class="n">mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">mapping</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                <span class="n">new_keys</span><span class="p">,</span> <span class="n">new_values</span> <span class="o">=</span> <span class="n">mkeys</span><span class="p">,</span> <span class="n">mvalues</span>
+                <span class="c"># convert keys if needed</span>
+                <span class="k">if</span> <span class="n">skey</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">unicode</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+                                <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">)</span> <span class="ow">and</span> \
+                   <span class="nb">all</span><span class="p">((</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">skey</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mkeys</span><span class="p">)):</span>
+                    <span class="n">new_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                    <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">new_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="p">[</span><span class="n">skey</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mkeys</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">skey</span> <span class="ow">is</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="ow">and</span> \
+                     <span class="nb">all</span><span class="p">((</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">skey</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mkeys</span><span class="p">)):</span>
+                    <span class="n">new_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                    <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">new_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="p">[</span><span class="n">parse</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mkeys</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">skey</span> <span class="ow">is</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span> <span class="ow">and</span> \
+                     <span class="nb">all</span><span class="p">((</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">skey</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mkeys</span><span class="p">)):</span>
+                    <span class="n">new_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                    <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">new_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="p">[</span><span class="n">parse</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+                                                       <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mkeys</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">skey</span> <span class="ow">is</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span> <span class="ow">and</span> \
+                     <span class="nb">all</span><span class="p">((</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">skey</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mkeys</span><span class="p">)):</span>
+                    <span class="n">new_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                    <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">new_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="p">[</span><span class="n">parse</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">timetz</span><span class="p">()</span>
+                                                       <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mkeys</span><span class="p">])</span>
+                <span class="c"># convert values if needed</span>
+                <span class="k">if</span> <span class="n">svalue</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">unicode</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+                                  <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">)</span> <span class="ow">and</span> \
+                   <span class="nb">all</span><span class="p">((</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">svalue</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mvalues</span><span class="p">)):</span>
+                    <span class="n">new_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                    <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">new_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="p">[</span><span class="n">svalue</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mvalues</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="ow">and</span> \
+                     <span class="nb">all</span><span class="p">((</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">svalue</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mvalues</span><span class="p">)):</span>
+                    <span class="n">new_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                    <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">new_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="p">[</span><span class="n">parse</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mvalues</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span> <span class="ow">and</span> \
+                     <span class="nb">all</span><span class="p">((</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">svalue</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mvalues</span><span class="p">)):</span>
+                    <span class="n">new_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                    <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">new_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="p">[</span><span class="n">parse</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+                                                         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mvalues</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span> <span class="ow">and</span> \
+                     <span class="nb">all</span><span class="p">((</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">svalue</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mvalues</span><span class="p">)):</span>
+                    <span class="n">new_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                    <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">new_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="p">[</span><span class="n">parse</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">timetz</span><span class="p">()</span>
+                                                         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mvalues</span><span class="p">])</span>
+                <span class="c"># create the new_map</span>
+                <span class="k">if</span> <span class="n">new_keys</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">mkeys</span> <span class="ow">or</span> <span class="n">new_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">mvalues</span><span class="p">:</span>
+                    <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">):</span> <span class="n">new_map</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">),</span>
+                        <span class="nb">zip</span><span class="p">(</span><span class="n">new_keys</span><span class="p">,</span> <span class="n">new_values</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_map</span> <span class="o">=</span> <span class="n">mapping</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">skey</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mapping</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">map_value</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">skey</span><span class="p">]</span>
+            <span class="c"># datetime</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="ow">and</span> \
+                 <span class="nb">isinstance</span><span class="p">(</span><span class="n">map_value</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+                <span class="c"># see: http://bugs.python.org/issue15873</span>
+                <span class="c"># see: http://bugs.python.org/issue6641</span>
+                <span class="n">new_value</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">map_value</span><span class="p">)</span>
+                <span class="n">new_map</span><span class="p">[</span><span class="n">skey</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+                <span class="k">continue</span>
+            <span class="c"># date</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">)</span> <span class="ow">and</span> \
+                 <span class="nb">isinstance</span><span class="p">(</span><span class="n">map_value</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+                <span class="n">new_value</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">map_value</span><span class="p">)</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+                <span class="n">new_map</span><span class="p">[</span><span class="n">skey</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+                <span class="k">return</span> <span class="n">new_value</span>
+            <span class="c"># time</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">)</span> <span class="ow">and</span> \
+                 <span class="nb">isinstance</span><span class="p">(</span><span class="n">map_value</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+                <span class="c"># see: http://bugs.python.org/issue15873</span>
+                <span class="c"># see: http://bugs.python.org/issue6641</span>
+                <span class="n">new_value</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">map_value</span><span class="p">)</span><span class="o">.</span><span class="n">timetz</span><span class="p">()</span>
+                <span class="n">new_map</span><span class="p">[</span><span class="n">skey</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+                <span class="k">return</span> <span class="n">new_value</span>
+            <span class="c"># this is a tuple of Document options</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">map_value</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+                <span class="c"># do smart guessing</span>
+                <span class="n">doc_type</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="n">map_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">sv</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">sv</span><span class="o">.</span><span class="n">doc_type</span><span class="o">!=</span><span class="n">doc_type</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                        <span class="c"># found</span>
+                    <span class="n">new_value</span> <span class="o">=</span> <span class="n">sv</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">new_map</span><span class="p">[</span><span class="n">skey</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+                    <span class="k">break</span>
+                <span class="k">continue</span>
+            <span class="c"># this is a sub dictionary (recursive)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">map_value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">new_map</span><span class="p">[</span><span class="n">skey</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_dict_item</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">map_value</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c"># this is an ordinary mapping dict, original type is fine</span>
+            <span class="n">new_map</span><span class="p">[</span><span class="n">skey</span><span class="p">]</span> <span class="o">=</span> <span class="n">svalue</span><span class="p">(</span><span class="n">map_value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_map</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts the requested dictionary item into Python value if it was</span>
+<span class="sd">        newly fetched from couchbase server and caches it.</span>
+
+<span class="sd">        :type item: str</span>
+<span class="sd">        :type raw: bool</span>
+<span class="sd">        :returns: Mixed; converted Python value that is defined in main document</span>
+<span class="sd">            structure.</span>
+<span class="sd">        :raises KeyError:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># usual error if key not found</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="n">dict_value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SchemaDocument</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="c"># newly created, field not in structure or the exact value was needed</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_new_record</span> <span class="ow">is</span> <span class="bp">True</span> <span class="ow">or</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="ow">or</span> <span class="n">raw</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">dict_value</span>
+        <span class="c"># HERE, THE THING STARTS</span>
+        <span class="n">svalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+        <span class="c"># no need to modify the item if one of these:</span>
+        <span class="n">ok_types</span> <span class="o">=</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">long</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">svalue</span> <span class="ow">in</span> <span class="n">ok_types</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_value</span><span class="p">,</span> <span class="n">ok_types</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dict_value</span>
+        <span class="c"># fix datetime string</span>
+        <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="ow">and</span> \
+             <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+            <span class="c"># see: http://bugs.python.org/issue15873</span>
+            <span class="c"># see: http://bugs.python.org/issue6641</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">dict_value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+            <span class="k">return</span> <span class="n">new_value</span>
+        <span class="c"># fix date string</span>
+        <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span> <span class="ow">and</span> \
+             <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">):</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">dict_value</span><span class="p">)</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+            <span class="k">return</span> <span class="n">new_value</span>
+        <span class="c"># fix time string</span>
+        <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span> <span class="ow">and</span> \
+             <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">):</span>
+            <span class="c"># see: http://bugs.python.org/issue15873</span>
+            <span class="c"># see: http://bugs.python.org/issue6641</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">dict_value</span><span class="p">)</span><span class="o">.</span><span class="n">timetz</span><span class="p">()</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+            <span class="k">return</span> <span class="n">new_value</span>
+        <span class="c"># fix CustomField</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_value</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">)</span> <span class="ow">and</span> \
+             <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> \
+             <span class="nb">issubclass</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">CustomField</span><span class="p">):</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="n">svalue</span><span class="p">(</span><span class="n">dict_value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+            <span class="k">return</span> <span class="n">new_value</span>
+        <span class="c"># fix Document</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_value</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">)</span> <span class="ow">and</span> \
+             <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> \
+             <span class="nb">issubclass</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">SchemaDocument</span><span class="p">):</span>
+            <span class="n">doc_type</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="n">dict_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="n">svalue</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+            <span class="k">return</span> <span class="n">new_value</span>
+        <span class="c"># fix python list elements</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> \
+             <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> \
+             <span class="nb">all</span><span class="p">((</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dv</span><span class="p">,</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">dict_value</span><span class="p">)):</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="nb">type</span><span class="p">(</span><span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">])(</span><span class="n">dv</span><span class="p">)</span> <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">dict_value</span><span class="p">])</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+            <span class="k">return</span> <span class="n">new_value</span>
+        <span class="c"># the type is a tuple, value must be an either Document instance in it</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_value</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+            <span class="c"># do smart guessing</span>
+            <span class="n">doc_type</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="n">dict_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">sv</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sv</span><span class="o">.</span><span class="n">doc_type</span><span class="o">!=</span><span class="n">doc_type</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="c"># found</span>
+                <span class="n">new_value</span> <span class="o">=</span> <span class="n">sv</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+                <span class="k">return</span> <span class="n">new_value</span>
+        <span class="c"># the type is dict instance, convert recursively</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_dict_item</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">dict_value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+            <span class="k">return</span> <span class="n">new_value</span>
+        <span class="c"># perhaps already converted</span>
+        <span class="k">return</span> <span class="n">dict_value</span>
+
+<div class="viewcode-block" id="SchemaDocument.load"><a class="viewcode-back" href="../../api-documentation.html#couchbasekit.schema.SchemaDocument.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Helper function to pre-load all the raw document values into Python</span>
+<span class="sd">        ones, custom types and/or other document relations as they are defined in</span>
+<span class="sd">        model document.</span>
+
+<span class="sd">        This is only useful when you need the instance to convert all its raw</span>
+<span class="sd">        values into Python types, custom fields and/or other document relations</span>
+<span class="sd">        *before* sending that object to somewhere else. For example, sending a</span>
+<span class="sd">        ``User`` document to your framework&#39;s ``login(request, user)`` function.</span>
+
+<span class="sd">        If your code is the only one accessing its values such as;</span>
+<span class="sd">        ``user.posts``, you don&#39;t have to ``.load()`` it as they&#39;re</span>
+<span class="sd">        auto-converted and cached on-demand.</span>
+
+<span class="sd">        Returns the instance itself so you can use it like:</span>
+
+<span class="sd">        &gt;&gt;&gt; book = Book(&#39;hhg2g&#39;).load()</span>
+
+<span class="sd">        :returns: The Document instance itself on which was called from.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+    <span class="k">def</span> <span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recursive validation for the given structure against the given</span>
+<span class="sd">        mapping dictionary.</span>
+
+<span class="sd">        :param structure: The structure (or a sub-structure) to validate.</span>
+<span class="sd">        :type structure: dict</span>
+<span class="sd">        :param mapping: The values dictionary to be checked against.</span>
+<span class="sd">        :type mapping: dict</span>
+<span class="sd">        :param root: True if it was first called from :meth:`validate`.</span>
+<span class="sd">        :type root: bool</span>
+<span class="sd">        :returns: Always True, or raises</span>
+<span class="sd">            :exc:`couchbasekit.errors.StructureError` exception.</span>
+<span class="sd">        :raises: :exc:`couchbasekit.errors.StructureError` if any validation</span>
+<span class="sd">            problem occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># if root, check the required fields first</span>
+        <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">rfield</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">required_fields</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">rfield</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mapping</span> <span class="ow">and</span> <span class="n">rfield</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_values</span><span class="p">)</span> <span class="ow">or</span> \
+                   <span class="p">(</span><span class="n">rfield</span> <span class="ow">in</span> <span class="n">mapping</span> <span class="ow">and</span> <span class="n">mapping</span><span class="p">[</span><span class="n">rfield</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span>
+                        <span class="n">msg</span><span class="o">=</span><span class="s">&#39;Required field for &quot;</span><span class="si">%s</span><span class="s">&quot; is missing.&#39;</span> <span class="o">%</span> <span class="n">rfield</span>
+                    <span class="p">)</span>
+        <span class="c"># check the dict structure</span>
+        <span class="k">for</span> <span class="n">skey</span><span class="p">,</span> <span class="n">svalue</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="c"># STRUCTURE KEY (FIELD) IS A TYPE</span>
+            <span class="c"># i.e. {unicode: int}</span>
+            <span class="k">if</span> <span class="n">skey</span> <span class="ow">in</span> <span class="n">ALLOWED_TYPES</span><span class="p">:</span>
+                <span class="c"># if it&#39;s a type pair, must be the only item</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span>
+                        <span class="n">msg</span><span class="o">=</span><span class="s">&#39;Type pairs must be the only item in a dictionary, &#39;</span>
+                            <span class="s">&#39;there are </span><span class="si">%d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="c"># key instance must be hash()&#39;able at this point</span>
+                <span class="c"># but we can&#39;t catch&#39;em all as every instance is</span>
+                <span class="c"># not simply created by skey(), unfortunately</span>
+                <span class="k">try</span><span class="p">:</span> <span class="nb">hash</span><span class="p">(</span><span class="n">skey</span><span class="p">())</span>
+                <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">why</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s">&#39;unhashable type&#39;</span> <span class="ow">in</span> <span class="n">why</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span>
+                            <span class="n">msg</span><span class="o">=</span><span class="s">&#39;Structure keys must be hashable, &#39;</span>
+                                <span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; given.&#39;</span> <span class="o">%</span> <span class="n">skey</span><span class="o">.</span><span class="n">__name__</span>
+                        <span class="p">)</span>
+                    <span class="c"># yes, we ignore the rest of TypeErrors</span>
+                    <span class="k">pass</span>
+                <span class="c"># check all the key types in the dict</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">skey</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">skey</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+                <span class="c"># structure value is a list</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="c"># and must have only 1 item</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span>
+                            <span class="n">msg</span><span class="o">=</span><span class="s">&#39;List values must have only 1 item, &#39;</span>
+                                <span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; had </span><span class="si">%d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skey</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">svalue</span><span class="p">))</span>
+                        <span class="p">)</span>
+                    <span class="k">elif</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span>
+                              <span class="p">(</span><span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ALLOWED_TYPES</span> <span class="ow">or</span>
+                               <span class="nb">issubclass</span><span class="p">(</span><span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">CustomField</span><span class="p">,</span> <span class="n">SchemaDocument</span><span class="p">)))):</span>
+                        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span>
+                            <span class="n">msg</span><span class="o">=</span><span class="s">&#39;A list has an invalid option in its &#39;</span>
+                                <span class="s">&#39;structure, &quot;</span><span class="si">%s</span><span class="s">&quot; is given.&#39;</span> <span class="o">%</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">)</span>
+                <span class="c"># structure value is a tuple, all must be Document instances</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                    <span class="n">invalid</span> <span class="o">=</span> <span class="nb">next</span><span class="p">([</span><span class="n">sv</span> <span class="k">for</span> <span class="n">sv</span> <span class="ow">in</span> <span class="n">svalue</span>
+                                    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span>
+                                            <span class="nb">issubclass</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">SchemaDocument</span><span class="p">)</span> <span class="ow">and</span>
+                                            <span class="nb">getattr</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="s">&#39;__key_field__&#39;</span><span class="p">))],</span>
+                                    <span class="bp">None</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">invalid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span>
+                            <span class="n">msg</span><span class="o">=</span><span class="s">&#39;A tuple structure must have only Document type &#39;</span>
+                                <span class="s">&#39;options and &quot;__key_field__&quot; attributes cannot be &#39;</span>
+                                <span class="s">&#39;undefined, &quot;</span><span class="si">%s</span><span class="s">&quot; is given.&#39;</span> <span class="o">%</span> <span class="n">invalid</span>
+                        <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">svalue</span><span class="p">):</span> <span class="c"># within the tuple</span>
+                            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                <span class="c"># structure value is an ALLOWED_TYPE or CustomField</span>
+                <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">in</span> <span class="n">ALLOWED_TYPES</span> <span class="ow">or</span> \
+                     <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span>
+                      <span class="nb">issubclass</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="p">(</span><span class="n">CustomField</span><span class="p">,</span> <span class="n">SchemaDocument</span><span class="p">))):</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">svalue</span><span class="p">):</span>
+                            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c"># STRUCTURE KEY (FIELD) IS A STRING</span>
+            <span class="c"># field not set or None anyway</span>
+            <span class="k">if</span> <span class="n">skey</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mapping</span> <span class="ow">or</span> <span class="n">mapping</span><span class="p">[</span><span class="n">skey</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c"># is it in allowed types?</span>
+            <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">in</span> <span class="n">ALLOWED_TYPES</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mapping</span><span class="p">[</span><span class="n">skey</span><span class="p">],</span> <span class="n">svalue</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="c"># some custom type or document relation?</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> \
+                 <span class="nb">issubclass</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="p">(</span><span class="n">CustomField</span><span class="p">,</span> <span class="n">SchemaDocument</span><span class="p">))</span> <span class="ow">and</span> \
+                 <span class="nb">isinstance</span><span class="p">(</span><span class="n">mapping</span><span class="p">[</span><span class="n">skey</span><span class="p">],</span> <span class="n">svalue</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="c"># structure value is a list</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="c"># and must have only 1 item</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span>
+                        <span class="n">msg</span><span class="o">=</span><span class="s">&#39;List values must have only 1 item, &#39;</span>
+                            <span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; had </span><span class="si">%d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skey</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">svalue</span><span class="p">))</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> \
+                     <span class="p">(</span><span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ALLOWED_TYPES</span> <span class="ow">or</span>
+                      <span class="nb">issubclass</span><span class="p">(</span><span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">CustomField</span><span class="p">,</span> <span class="n">SchemaDocument</span><span class="p">)))</span> <span class="ow">and</span> \
+                     <span class="nb">isinstance</span><span class="p">(</span><span class="n">mapping</span><span class="p">[</span><span class="n">skey</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> \
+                     <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mapping</span><span class="p">[</span><span class="n">skey</span><span class="p">]]):</span>
+                    <span class="k">continue</span>
+            <span class="c"># structure value is a tuple, all must be Document instances</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span>
+                        <span class="nb">issubclass</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">SchemaDocument</span><span class="p">)</span> <span class="ow">and</span>
+                        <span class="nb">getattr</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="s">&#39;__key_field__&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">sv</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">])</span> <span class="ow">and</span> \
+                   <span class="nb">isinstance</span><span class="p">(</span><span class="n">mapping</span><span class="p">[</span><span class="n">skey</span><span class="p">],</span> <span class="n">svalue</span><span class="p">):</span> <span class="c"># within the tuple</span>
+                    <span class="k">continue</span>
+            <span class="c"># it&#39;s a dictionary instance, check recursively</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> \
+                 <span class="nb">isinstance</span><span class="p">(</span><span class="n">mapping</span><span class="p">[</span><span class="n">skey</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> \
+                 <span class="nb">len</span><span class="p">(</span><span class="n">mapping</span><span class="p">[</span><span class="n">skey</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">mapping</span><span class="p">[</span><span class="n">skey</span><span class="p">]):</span>
+                    <span class="k">continue</span>
+            <span class="c"># houston, we got a problem!</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span><span class="n">skey</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">mapping</span><span class="p">[</span><span class="n">skey</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="SchemaDocument.validate"><a class="viewcode-back" href="../../api-documentation.html#couchbasekit.schema.SchemaDocument.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Validates the document object with current values, always called</span>
+<span class="sd">        within :meth:`couchbasekit.document.Document.save` method.</span>
+
+<span class="sd">        :returns: Always True, or raises</span>
+<span class="sd">            :exc:`couchbasekit.errors.StructureError` exception.</span>
+<span class="sd">        :raises: :exc:`couchbasekit.errors.StructureError` if</span>
+<span class="sd">            any validation problem occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># __key_field__ value must be provided if defined</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__key_field__</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__key_field__</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">StructureError</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s">&#39;Key field &quot;</span><span class="si">%s</span><span class="s">&quot; is defined &#39;</span>
+                                     <span class="s">&#39;but not provided.&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__key_field__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">couchbasekit 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Roy Enjoy (aka &#39;kirpit&#39;).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

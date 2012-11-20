@@ -1,0 +1,851 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>API Documentation &mdash; couchbasekit 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="couchbasekit 0.1.0 documentation" href="index.html" />
+    <link rel="prev" title="Document Structure" href="structure.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="structure.html" title="Document Structure"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">couchbasekit 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="api-documentation">
+<h1>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+<span class="target" id="module-couchbasekit.connection"></span><div class="section" id="couchbasekit-connection">
+<h2>couchbasekit.connection<a class="headerlink" href="#couchbasekit-connection" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">website:</th><td class="field-body"><a class="reference external" href="http://github.com/kirpit/couchbasekit">http://github.com/kirpit/couchbasekit</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">copyright:</th><td class="field-body">Copyright 2012, Roy Enjoy &lt;kirpit <em>at</em> gmail.com&gt;, see AUTHORS.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">license:</th><td class="field-body">MIT, see LICENSE for details.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="couchbasekit.connection.Connection">
+<em class="property">class </em><tt class="descclassname">couchbasekit.connection.</tt><tt class="descname">Connection</tt><a class="reference internal" href="_modules/couchbasekit/connection.html#Connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.connection.Connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the singleton pattern for handling couchbase connections
+application-wide.</p>
+<p>Simply set your authentication credentials at the beginning of your
+application (such as in &#8220;settings.py&#8221;) by:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">couchbasekit</span> <span class="kn">import</span> <span class="n">Connection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Connection</span><span class="o">.</span><span class="n">auth</span><span class="p">(</span><span class="s">&#39;theusername&#39;</span><span class="p">,</span> <span class="s">&#39;p@ssword&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Connection</span><span class="o">.</span><span class="n">auth</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">username</span><span class="o">=</span><span class="s">&#39;theusername&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&#39;p@ssword&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">server</span><span class="o">=</span><span class="s">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s">&#39;8091&#39;</span><span class="p">,</span> <span class="c"># default already</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>This class is not intended to create instances, so don&#8217;t try to do:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">()</span> <span class="c"># wrong</span>
+</pre></div>
+</div>
+<p class="last">or you will get a <tt class="xref py py-exc docutils literal"><span class="pre">RuntimeWarning</span></tt>.</p>
+</div>
+<dl class="classmethod">
+<dt id="couchbasekit.connection.Connection.auth">
+<em class="property">classmethod </em><tt class="descname">auth</tt><big>(</big><em>username</em>, <em>password</em>, <em>server='localhost'</em>, <em>port='8091'</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/connection.html#Connection.auth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.connection.Connection.auth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the couchbase connection credentials, globally.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>username</strong> (<em>str</em>) &#8211; bucket username (or &#8220;Administrator&#8221; for working with
+multi buckets).</li>
+<li><strong>password</strong> (<em>str</em>) &#8211; bucket password (or Administrator&#8217;s password for
+working with multi buckets).</li>
+<li><strong>server</strong> (<em>str</em>) &#8211; couchbase server to connect, defaults to &#8220;localhost&#8221;.</li>
+<li><strong>port</strong> (<em>str</em>) &#8211; couchbase server port, defaults to &#8220;8091&#8221;.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="couchbasekit.connection.Connection.bucket">
+<em class="property">classmethod </em><tt class="descname">bucket</tt><big>(</big><em>bucket</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/connection.html#Connection.bucket"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.connection.Connection.bucket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives the bucket from couchbase server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bucket</strong> (<em>str</em>) &#8211; Bucket name to fetch.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">couchbase driver&#8217;s Bucket object.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">couchbase.client.Bucket</span></tt></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body"><a class="reference internal" href="#couchbasekit.errors.CredentialsNotSetError" title="couchbasekit.errors.CredentialsNotSetError"><tt class="xref py py-exc docutils literal"><span class="pre">couchbasekit.errors.CredentialsNotSetError</span></tt></a> If the
+credentials wasn&#8217;t set.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="couchbasekit.connection.Connection.close">
+<em class="property">classmethod </em><tt class="descname">close</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/couchbasekit/connection.html#Connection.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.connection.Connection.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes the current connection, which would be useful to ensure that
+no orphan couchbase processes are left. Use it in, for example one of
+your Django middleware&#8217;s <tt class="xref py py-meth docutils literal"><span class="pre">process_response()</span></tt>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The class will open a new connection if a bucket is requested even
+though its connection was closed already.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-couchbasekit.document"></span><div class="section" id="couchbasekit-document">
+<h2>couchbasekit.document<a class="headerlink" href="#couchbasekit-document" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">website:</th><td class="field-body"><a class="reference external" href="http://github.com/kirpit/couchbasekit">http://github.com/kirpit/couchbasekit</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">copyright:</th><td class="field-body">Copyright 2012, Roy Enjoy &lt;kirpit <em>at</em> gmail.com&gt;, see AUTHORS.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">license:</th><td class="field-body">MIT, see LICENSE for details.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="couchbasekit.document.Document">
+<em class="property">class </em><tt class="descclassname">couchbasekit.document.</tt><tt class="descname">Document</tt><big>(</big><em>key_or_map=None</em>, <em>get_lock=False</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/document.html#Document"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.document.Document" title="Permalink to this definition">¶</a></dt>
+<dd><p>Couchbase document to be inherited by user-defined model documents that
+handles everything from validation to comparison with the help of
+<a class="reference internal" href="#couchbasekit.schema.SchemaDocument" title="couchbasekit.schema.SchemaDocument"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.schema.SchemaDocument</span></tt></a> parent class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>key_or_map</strong> (<em>basestring or dict</em>) &#8211; Either the document id to be fetched or dictionary
+to initialize the first values of a new document.</li>
+<li><strong>get_lock</strong> (<em>bool</em>) &#8211; True, if the document wanted to be locked for other
+processes, defaults to False.</li>
+<li><strong>kwargs</strong> &#8211; key=value arguments to be passed to the dictionary.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body"><p class="first last"><a class="reference internal" href="#couchbasekit.errors.StructureError" title="couchbasekit.errors.StructureError"><tt class="xref py py-exc docutils literal"><span class="pre">couchbasekit.errors.StructureError</span></tt></a> or
+<a class="reference internal" href="#couchbasekit.errors.DoesNotExist" title="couchbasekit.errors.DoesNotExist"><tt class="xref py py-exc docutils literal"><span class="pre">couchbasekit.errors.DoesNotExist</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="exception">
+<dt id="couchbasekit.document.Document.DoesNotExist">
+<em class="property">exception </em><tt class="descname">DoesNotExist</tt><big>(</big><em>obj</em>, <em>key</em><big>)</big><a class="headerlink" href="#couchbasekit.document.Document.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when a model class passed with an id to be fetched, but not
+found within couchbase.</p>
+<p>You don&#8217;t have to specifically import this error to check if does not exist
+because your model document has just the same error for convenience.
+For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">try</span><span class="p">:</span>
+    <span class="n">mrnobody</span> <span class="o">=</span> <span class="n">Author</span><span class="p">(</span><span class="s">&#39;someone_doesnt_exist&#39;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">Author</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+    <span class="c"># some useful code here</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="couchbasekit.document.Document.bucket">
+<tt class="descclassname">Document.</tt><tt class="descname">bucket</tt><a class="reference internal" href="_modules/couchbasekit/document.html#Document.bucket"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.document.Document.bucket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the couchbase Bucket object for this instance, object property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">See: <tt class="xref py py-class docutils literal"><span class="pre">couchbase.client.Bucket</span></tt>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">couchbase.client.Bucket</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="couchbasekit.document.Document.doc_id">
+<tt class="descclassname">Document.</tt><tt class="descname">doc_id</tt><a class="reference internal" href="_modules/couchbasekit/document.html#Document.doc_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.document.Document.doc_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the couchbase document&#8217;s id, object property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The document id (that is created from <tt class="xref py py-attr docutils literal"><span class="pre">doc_type</span></tt> and
+<tt class="xref py py-attr docutils literal"><span class="pre">__key_field__</span></tt> value, or auto-hashed document id at first
+saving).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">unicode</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="couchbasekit.document.Document.id">
+<tt class="descclassname">Document.</tt><tt class="descname">id</tt><a class="reference internal" href="_modules/couchbasekit/document.html#Document.id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.document.Document.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the document&#8217;s key field value (sort of primary key if you
+defined it in your model, which is optional), object property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The document key if <tt class="xref py py-attr docutils literal"><span class="pre">__key_field__</span></tt> was defined, or None.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">unicode or None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="couchbasekit.document.Document.save">
+<tt class="descclassname">Document.</tt><tt class="descname">save</tt><big>(</big><em>expiry=0</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/document.html#Document.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.document.Document.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the current instance after validating it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>expiry</strong> (<em>int</em>) &#8211; Expiration in seconds for the document to be removed by
+couchbase server, defaults to 0 - will never expire.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">couchbase document CAS value</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body"><a class="reference internal" href="#couchbasekit.errors.StructureError" title="couchbasekit.errors.StructureError"><tt class="xref py py-exc docutils literal"><span class="pre">couchbasekit.errors.StructureError</span></tt></a>,
+See <a class="reference internal" href="#couchbasekit.schema.SchemaDocument.validate" title="couchbasekit.schema.SchemaDocument.validate"><tt class="xref py py-meth docutils literal"><span class="pre">couchbasekit.schema.SchemaDocument.validate()</span></tt></a>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="couchbasekit.document.Document.view">
+<tt class="descclassname">Document.</tt><tt class="descname">view</tt><big>(</big><em>view=None</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/document.html#Document.view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.document.Document.view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the couchbase view(s) if <tt class="xref py py-attr docutils literal"><span class="pre">__view_name__</span></tt> was provided
+within model class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>view</strong> (<em>str</em>) &#8211; If provided returns the asked couchbase view object or
+<tt class="xref py py-attr docutils literal"><span class="pre">__view_name__</span></tt> design document.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">couchbase design document, couchbase view or None</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">couchbase.client.DesignDoc</span></tt> or
+<tt class="xref py py-class docutils literal"><span class="pre">couchbase.client.View</span></tt> or None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-couchbasekit.schema"></span><div class="section" id="couchbasekit-schema">
+<h2>couchbasekit.schema<a class="headerlink" href="#couchbasekit-schema" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">website:</th><td class="field-body"><a class="reference external" href="http://github.com/kirpit/couchbasekit">http://github.com/kirpit/couchbasekit</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">copyright:</th><td class="field-body">Copyright 2012, Roy Enjoy &lt;kirpit <em>at</em> gmail.com&gt;, see AUTHORS.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">license:</th><td class="field-body">MIT, see LICENSE for details.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="couchbasekit.schema.SchemaDocument">
+<em class="property">class </em><tt class="descclassname">couchbasekit.schema.</tt><tt class="descname">SchemaDocument</tt><big>(</big><em>seq=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/schema.html#SchemaDocument"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.schema.SchemaDocument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Schema document class that handles validations and restoring raw
+couchbase documents into Python values as defined in model documents.</p>
+<p>Under normal circumstances, you don&#8217;t use or inherit this class at all,
+because it is only being used by <a class="reference internal" href="#couchbasekit.document.Document" title="couchbasekit.document.Document"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.document.Document</span></tt></a>
+class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>seq</strong> (<em>dict</em>) &#8211; Document data to store at initialization, defaults to None.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body"><a class="reference internal" href="#couchbasekit.errors.StructureError" title="couchbasekit.errors.StructureError"><tt class="xref py py-exc docutils literal"><span class="pre">couchbasekit.errors.StructureError</span></tt></a> if the minimum
+structure requirements wasn&#8217;t satisfied.</td>
+</tr>
+</tbody>
+</table>
+<dl class="exception">
+<dt id="couchbasekit.schema.SchemaDocument.StructureError">
+<em class="property">exception </em><tt class="descname">StructureError</tt><big>(</big><em>key=None</em>, <em>exp=None</em>, <em>given=None</em>, <em>msg=''</em><big>)</big><a class="headerlink" href="#couchbasekit.schema.SchemaDocument.StructureError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when things go wrong about your model class structure or instance
+values. For example, you pass an <tt class="xref py py-class docutils literal"><span class="pre">int</span></tt> value to some field that
+should be <tt class="xref py py-class docutils literal"><span class="pre">str</span></tt> or some required field wasn&#8217;t provided etc..</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="couchbasekit.schema.SchemaDocument.load">
+<tt class="descclassname">SchemaDocument.</tt><tt class="descname">load</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/couchbasekit/schema.html#SchemaDocument.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.schema.SchemaDocument.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to pre-load all the raw document values into Python
+ones, custom types and/or other document relations as they are defined in
+model document.</p>
+<p>This is only useful when you need the instance to convert all its raw
+values into Python types, custom fields and/or other document relations
+<em>before</em> sending that object to somewhere else. For example, sending a
+<tt class="docutils literal"><span class="pre">User</span></tt> document to your framework&#8217;s <tt class="docutils literal"><span class="pre">login(request,</span> <span class="pre">user)</span></tt> function.</p>
+<p>If your code is the only one accessing its values such as;
+<tt class="docutils literal"><span class="pre">user.posts</span></tt>, you don&#8217;t have to <tt class="docutils literal"><span class="pre">.load()</span></tt> it as they&#8217;re
+auto-converted and cached on-demand.</p>
+<p>Returns the instance itself so you can use it like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">book</span> <span class="o">=</span> <span class="n">Book</span><span class="p">(</span><span class="s">&#39;hhg2g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The Document instance itself on which was called from.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="couchbasekit.schema.SchemaDocument.validate">
+<tt class="descclassname">SchemaDocument.</tt><tt class="descname">validate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/couchbasekit/schema.html#SchemaDocument.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.schema.SchemaDocument.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates the document object with current values, always called
+within <a class="reference internal" href="#couchbasekit.document.Document.save" title="couchbasekit.document.Document.save"><tt class="xref py py-meth docutils literal"><span class="pre">couchbasekit.document.Document.save()</span></tt></a> method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Always True, or raises
+<a class="reference internal" href="#couchbasekit.errors.StructureError" title="couchbasekit.errors.StructureError"><tt class="xref py py-exc docutils literal"><span class="pre">couchbasekit.errors.StructureError</span></tt></a> exception.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body"><a class="reference internal" href="#couchbasekit.errors.StructureError" title="couchbasekit.errors.StructureError"><tt class="xref py py-exc docutils literal"><span class="pre">couchbasekit.errors.StructureError</span></tt></a> if
+any validation problem occurs.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<dl class="data">
+<dt id="couchbasekit.schema.ALLOWED_TYPES">
+<tt class="descclassname">couchbasekit.schema.</tt><tt class="descname">ALLOWED_TYPES</tt><a class="headerlink" href="#couchbasekit.schema.ALLOWED_TYPES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This is the constant that will be used to check your model structure
+definitions:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">ALLOWED_TYPES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="nb">bool</span><span class="p">,</span>
+    <span class="nb">int</span><span class="p">,</span>
+    <span class="nb">long</span><span class="p">,</span>
+    <span class="nb">float</span><span class="p">,</span>
+    <span class="nb">unicode</span><span class="p">,</span>
+    <span class="nb">basestring</span><span class="p">,</span>
+    <span class="nb">list</span><span class="p">,</span>
+    <span class="nb">set</span><span class="p">,</span>
+    <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+    <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
+    <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>However, it doesn&#8217;t include <tt class="xref py py-class docutils literal"><span class="pre">str</span></tt> type intentionally because couchbase
+will keep your values in <tt class="xref py py-class docutils literal"><span class="pre">unicode</span></tt> and you will have trouble re-saving
+a <tt class="xref py py-class docutils literal"><span class="pre">str</span></tt> field right after you fetch it. If you really have to pass a
+<tt class="xref py py-class docutils literal"><span class="pre">str</span></tt> value while you first creating a document record, you can simply
+define your field as <tt class="xref py py-class docutils literal"><span class="pre">basestring</span></tt> and both types will be accepted at the
+time of validation.</p>
+<p>Besides these ones, you can also use <a class="reference internal" href="#couchbasekit.document.Document" title="couchbasekit.document.Document"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.document.Document</span></tt></a>
+for document relations and <a class="reference internal" href="#couchbasekit.fields.CustomField" title="couchbasekit.fields.CustomField"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.fields.CustomField</span></tt></a> subclasses
+for special field types. See <a class="reference internal" href="#module-couchbasekit.fields" title="couchbasekit.fields"><tt class="xref py py-mod docutils literal"><span class="pre">couchbasekit.fields</span></tt></a>.</p>
+<span class="target" id="module-couchbasekit.fields"></span><div class="section" id="couchbasekit-fields">
+<h2>couchbasekit.fields<a class="headerlink" href="#couchbasekit-fields" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">website:</th><td class="field-body"><a class="reference external" href="http://github.com/kirpit/couchbasekit">http://github.com/kirpit/couchbasekit</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">copyright:</th><td class="field-body">Copyright 2012, Roy Enjoy &lt;kirpit <em>at</em> gmail.com&gt;, see AUTHORS.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">license:</th><td class="field-body">MIT, see LICENSE for details.</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><a class="reference internal" href="#couchbasekit.fields.CustomField" title="couchbasekit.fields.CustomField"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.fields.CustomField</span></tt></a></li>
+<li><a class="reference internal" href="#couchbasekit.fields.ChoiceField" title="couchbasekit.fields.ChoiceField"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.fields.ChoiceField</span></tt></a></li>
+<li><a class="reference internal" href="#couchbasekit.fields.EmailField" title="couchbasekit.fields.EmailField"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.fields.EmailField</span></tt></a></li>
+<li><a class="reference internal" href="#couchbasekit.fields.PasswordField" title="couchbasekit.fields.PasswordField"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.fields.PasswordField</span></tt></a></li>
+</ul>
+<dl class="class">
+<dt id="couchbasekit.fields.ChoiceField">
+<em class="property">class </em><tt class="descclassname">couchbasekit.fields.</tt><tt class="descname">ChoiceField</tt><big>(</big><em>choice</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/fields.html#ChoiceField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.fields.ChoiceField" title="Permalink to this definition">¶</a></dt>
+<dd><p>The custom field to be used for multi choice options such as gender,
+static category list etc. This class can&#8217;t be used directly that has to be
+extended by your choice list class. Thankfully, it&#8217;s just easy:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Gender</span><span class="p">(</span><span class="n">ChoiceField</span><span class="p">):</span>
+    <span class="n">CHOICES</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;M&#39;</span><span class="p">:</span> <span class="s">&#39;Male&#39;</span><span class="p">,</span>
+        <span class="s">&#39;F&#39;</span><span class="p">:</span> <span class="s">&#39;Female&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>and all you have to do is to pass the current value to create your choice
+object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">choice</span> <span class="o">=</span> <span class="n">Gender</span><span class="p">(</span><span class="s">&#39;F&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">choice</span><span class="o">.</span><span class="n">value</span>
+<span class="go">&#39;F&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">choice</span><span class="o">.</span><span class="n">text</span>
+<span class="go">&#39;Female&#39;</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>choice</strong> (<em>basestring</em>) &#8211; The choice value.</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="couchbasekit.fields.ChoiceField.text">
+<tt class="descname">text</tt><a class="reference internal" href="_modules/couchbasekit/fields.html#ChoiceField.text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.fields.ChoiceField.text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the text of the current choice, object property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">unicode</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="couchbasekit.fields.CustomField">
+<em class="property">class </em><tt class="descclassname">couchbasekit.fields.</tt><tt class="descname">CustomField</tt><a class="reference internal" href="_modules/couchbasekit/fields.html#CustomField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.fields.CustomField" title="Permalink to this definition">¶</a></dt>
+<dd><p>The abstract custom field to be extended by all other field classes.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>You can also create your own custom field types by implementing this
+class. All you have to do is to assign your final (that is calculated
+and ready to be saved) value to the <a class="reference internal" href="#couchbasekit.fields.CustomField.value" title="couchbasekit.fields.CustomField.value"><tt class="xref py py-attr docutils literal"><span class="pre">value</span></tt></a> property. Please
+note that it should also accept unicode raw values, which are fetched
+and returned from couchbase server. See <a class="reference internal" href="#couchbasekit.fields.PasswordField" title="couchbasekit.fields.PasswordField"><tt class="xref py py-class docutils literal"><span class="pre">PasswordField</span></tt></a> source
+code as an example.</p>
+<p class="last">Please contribute back if you create a generic and useful custom field.</p>
+</div>
+<dl class="attribute">
+<dt id="couchbasekit.fields.CustomField.value">
+<tt class="descname">value</tt><a class="reference internal" href="_modules/couchbasekit/fields.html#CustomField.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.fields.CustomField.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property to be used when saving a custom field into
+<a class="reference internal" href="#couchbasekit.document.Document" title="couchbasekit.document.Document"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.document.Document</span></tt></a> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The value to be saved for the field within
+<a class="reference internal" href="#couchbasekit.document.Document" title="couchbasekit.document.Document"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.document.Document</span></tt></a> instances.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">unicode</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="couchbasekit.fields.EmailField">
+<em class="property">class </em><tt class="descclassname">couchbasekit.fields.</tt><tt class="descname">EmailField</tt><big>(</big><em>email</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/fields.html#EmailField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.fields.EmailField" title="Permalink to this definition">¶</a></dt>
+<dd><p>The custom field to be used for email addresses and intended to validate
+them as well.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Email address validation is NOT implemented yet. A best practice
+validation that doesn&#8217;t depend on any other package is much appreciated.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>email</strong> (<em>basestring</em>) &#8211; Email address to be saved.</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="couchbasekit.fields.EmailField.is_valid">
+<em class="property">static </em><tt class="descname">is_valid</tt><big>(</big><em>email</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/fields.html#EmailField.is_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.fields.EmailField.is_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Email address validation method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>email</strong> (<em>basestring</em>) &#8211; Email address to be saved.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Always True, as it&#8217;s not implemented yet.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="couchbasekit.fields.PasswordField">
+<em class="property">class </em><tt class="descclassname">couchbasekit.fields.</tt><tt class="descname">PasswordField</tt><big>(</big><em>password</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/fields.html#PasswordField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.fields.PasswordField" title="Permalink to this definition">¶</a></dt>
+<dd><p>The custom field to be used for password types.</p>
+<p>It encrypts the raw passwords on-the-fly and depends on
+<cite>py-bcrypt</cite> library for such encryption.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>password</strong> (<em>unicode</em>) &#8211; Raw or encrypted password value.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body"><tt class="xref py py-exc docutils literal"><span class="pre">ImportError</span></tt> if <cite>py-bcrypt</cite> was not found.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="couchbasekit.fields.PasswordField.check_password">
+<tt class="descname">check_password</tt><big>(</big><em>raw_password</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/fields.html#PasswordField.check_password"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.fields.PasswordField.check_password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates the given raw password against the intance&#8217;s encrypted one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>raw_password</strong> (<em>unicode</em>) &#8211; Raw password to be checked against.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if comparison was successful, False otherwise.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body"><tt class="xref py py-exc docutils literal"><span class="pre">ImportError</span></tt> if <cite>py-bcrypt</cite> was not found.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="couchbasekit.fields.PasswordField.get_bcrypt">
+<em class="property">static </em><tt class="descname">get_bcrypt</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/couchbasekit/fields.html#PasswordField.get_bcrypt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.fields.PasswordField.get_bcrypt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>py-bcrypt</cite> library for internal usage.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>py-bcrypt</cite> package.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body"><tt class="xref py py-exc docutils literal"><span class="pre">ImportError</span></tt> if <cite>py-bcrypt</cite> was not found.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-couchbasekit.errors"></span><div class="section" id="couchbasekit-errors">
+<h2>couchbasekit.errors<a class="headerlink" href="#couchbasekit-errors" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">website:</th><td class="field-body"><a class="reference external" href="http://github.com/kirpit/couchbasekit">http://github.com/kirpit/couchbasekit</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">copyright:</th><td class="field-body">Copyright 2012, Roy Enjoy &lt;kirpit <em>at</em> gmail.com&gt;, see AUTHORS.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">license:</th><td class="field-body">MIT, see LICENSE for details.</td>
+</tr>
+</tbody>
+</table>
+<dl class="exception">
+<dt id="couchbasekit.errors.CouchbasekitException">
+<em class="property">exception </em><tt class="descclassname">couchbasekit.errors.</tt><tt class="descname">CouchbasekitException</tt><a class="reference internal" href="_modules/couchbasekit/errors.html#CouchbasekitException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.errors.CouchbasekitException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Just to have some base exception class.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="couchbasekit.errors.CredentialsNotSetError">
+<em class="property">exception </em><tt class="descclassname">couchbasekit.errors.</tt><tt class="descname">CredentialsNotSetError</tt><a class="reference internal" href="_modules/couchbasekit/errors.html#CredentialsNotSetError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.errors.CredentialsNotSetError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when your <tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.connections.Connection</span></tt>
+credentials are not set.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="couchbasekit.errors.DoesNotExist">
+<em class="property">exception </em><tt class="descclassname">couchbasekit.errors.</tt><tt class="descname">DoesNotExist</tt><big>(</big><em>obj</em>, <em>key</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/errors.html#DoesNotExist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.errors.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when a model class passed with an id to be fetched, but not
+found within couchbase.</p>
+<p>You don&#8217;t have to specifically import this error to check if does not exist
+because your model document has just the same error for convenience.
+For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">try</span><span class="p">:</span>
+    <span class="n">mrnobody</span> <span class="o">=</span> <span class="n">Author</span><span class="p">(</span><span class="s">&#39;someone_doesnt_exist&#39;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">Author</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+    <span class="c"># some useful code here</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="exception">
+<dt id="couchbasekit.errors.StructureError">
+<em class="property">exception </em><tt class="descclassname">couchbasekit.errors.</tt><tt class="descname">StructureError</tt><big>(</big><em>key=None</em>, <em>exp=None</em>, <em>given=None</em>, <em>msg=''</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/errors.html#StructureError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.errors.StructureError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when things go wrong about your model class structure or instance
+values. For example, you pass an <tt class="xref py py-class docutils literal"><span class="pre">int</span></tt> value to some field that
+should be <tt class="xref py py-class docutils literal"><span class="pre">str</span></tt> or some required field wasn&#8217;t provided etc..</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-couchbasekit.middlewares"></span><div class="section" id="couchbasekit-middlewares">
+<h2>couchbasekit.middlewares<a class="headerlink" href="#couchbasekit-middlewares" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">website:</th><td class="field-body"><a class="reference external" href="http://github.com/kirpit/couchbasekit">http://github.com/kirpit/couchbasekit</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">copyright:</th><td class="field-body">Copyright 2012, Roy Enjoy &lt;kirpit <em>at</em> gmail.com&gt;, see AUTHORS.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">license:</th><td class="field-body">MIT, see LICENSE for details.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="couchbasekit.middlewares.CouchbasekitMiddleware">
+<em class="property">class </em><tt class="descclassname">couchbasekit.middlewares.</tt><tt class="descname">CouchbasekitMiddleware</tt><a class="reference internal" href="_modules/couchbasekit/middlewares.html#CouchbasekitMiddleware"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.middlewares.CouchbasekitMiddleware" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper that can be used in Django Middlewares to close couchbase
+connection gracefully in order not leave any orphan subprocess behind.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-couchbasekit.viewsync"></span><div class="section" id="couchbasekit-viewsync">
+<h2>couchbasekit.viewsync<a class="headerlink" href="#couchbasekit-viewsync" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">website:</th><td class="field-body"><a class="reference external" href="http://github.com/kirpit/couchbasekit">http://github.com/kirpit/couchbasekit</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">copyright:</th><td class="field-body">Copyright 2012, Roy Enjoy &lt;kirpit <em>at</em> gmail.com&gt;, see AUTHORS.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">license:</th><td class="field-body">MIT, see LICENSE for details.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="couchbasekit.viewsync.ViewSync">
+<em class="property">class </em><tt class="descclassname">couchbasekit.viewsync.</tt><tt class="descname">ViewSync</tt><a class="reference internal" href="_modules/couchbasekit/viewsync.html#ViewSync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.viewsync.ViewSync" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an experimental helper to download, upload and synchronize your
+couchbase views (both map and reduce JavaScript functions) in an organized
+way.</p>
+<p>Unfortunately, it&#8217;s quite impossible to synchronize these views since
+couchbase doesn&#8217;t provide any information about when a specific view was
+created and modified. So we can&#8217;t know if previously downloaded .js file or
+the current one at couchbase server should be replaced..</p>
+<p>This class also works in a singleton pattern so all its methods are
+<tt class="docutils literal"><span class="pre">&#64;classmethod</span></tt> that you don&#8217;t need to create an instance at all.</p>
+<p>In order to use this tool, you have to set its VIEW_PATH attribute to the
+directory wherever you want to keep downloaded JavaScript files. It is
+better to keep that directory under version controlled folder, as they can
+also become your view backups.</p>
+<dl class="classmethod">
+<dt id="couchbasekit.viewsync.ViewSync.download">
+<em class="property">classmethod </em><tt class="descname">download</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/couchbasekit/viewsync.html#ViewSync.download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.viewsync.ViewSync.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloads all the views from server for the registered model
+documents into the defined <tt class="xref py py-attr docutils literal"><span class="pre">VIEW_PATHS</span></tt> directory.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="couchbasekit.viewsync.ViewSync.register_document">
+<em class="property">classmethod </em><tt class="descname">register_document</tt><big>(</big><em>document</em><big>)</big><a class="reference internal" href="_modules/couchbasekit/viewsync.html#ViewSync.register_document"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.viewsync.ViewSync.register_document" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a model document within the synchronizer:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">example.samples.book</span> <span class="kn">import</span> <span class="n">Book</span>
+<span class="n">ViewSync</span><span class="o">.</span><span class="n">register_document</span><span class="p">(</span><span class="n">Book</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, you should also set your
+<a class="reference internal" href="#couchbasekit.document.Document" title="couchbasekit.document.Document"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.document.Document</span></tt></a>&#8216;s <tt class="docutils literal"><span class="pre">__view_name__</span></tt> attribute
+to the design document name of your view, i.e. <tt class="docutils literal"><span class="pre">'dev_books'</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>document</strong> (<a class="reference internal" href="#couchbasekit.document.Document" title="couchbasekit.document.Document"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.document.Document</span></tt></a>) &#8211; The model document class to be registered.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="couchbasekit.viewsync.ViewSync.sync">
+<em class="property">classmethod </em><tt class="descname">sync</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/couchbasekit/viewsync.html#ViewSync.sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.viewsync.ViewSync.sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not implemented yet.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="couchbasekit.viewsync.ViewSync.upload">
+<em class="property">classmethod </em><tt class="descname">upload</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/couchbasekit/viewsync.html#ViewSync.upload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#couchbasekit.viewsync.ViewSync.upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not implemented yet.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API Documentation</a><ul>
+<li><a class="reference internal" href="#couchbasekit-connection">couchbasekit.connection</a></li>
+<li><a class="reference internal" href="#couchbasekit-document">couchbasekit.document</a></li>
+<li><a class="reference internal" href="#couchbasekit-schema">couchbasekit.schema</a></li>
+<li><a class="reference internal" href="#couchbasekit-fields">couchbasekit.fields</a></li>
+<li><a class="reference internal" href="#couchbasekit-errors">couchbasekit.errors</a></li>
+<li><a class="reference internal" href="#couchbasekit-middlewares">couchbasekit.middlewares</a></li>
+<li><a class="reference internal" href="#couchbasekit-viewsync">couchbasekit.viewsync</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="structure.html"
+                        title="previous chapter">Document Structure</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/api-documentation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="structure.html" title="Document Structure"
+             >previous</a> |</li>
+        <li><a href="index.html">couchbasekit 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Roy Enjoy (aka &#39;kirpit&#39;).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

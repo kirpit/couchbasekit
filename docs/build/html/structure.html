@@ -1,0 +1,330 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Document Structure &mdash; couchbasekit 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="couchbasekit 0.1.0 documentation" href="index.html" />
+    <link rel="next" title="API Documentation" href="api-documentation.html" />
+    <link rel="prev" title="Model Document" href="model-document.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api-documentation.html" title="API Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="model-document.html" title="Model Document"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">couchbasekit 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="document-structure">
+<span id="id1"></span><h1>Document Structure<a class="headerlink" href="#document-structure" title="Permalink to this headline">¶</a></h1>
+<p>Structure definition dictionary is the most important part of your model
+document. They are similar to table fields in relational SQL systems in a way.
+You simply need to define them as key-value that corresponds to
+field_name: field_type. Keep reading...</p>
+<div class="section" id="allowed-types">
+<h2>Allowed Types<a class="headerlink" href="#allowed-types" title="Permalink to this headline">¶</a></h2>
+<p>To begin, you may simply define those field types as standard Python types, see
+<a class="reference internal" href="api-documentation.html#couchbasekit.schema.ALLOWED_TYPES" title="couchbasekit.schema.ALLOWED_TYPES"><tt class="xref py py-const docutils literal"><span class="pre">couchbasekit.schema.ALLOWED_TYPES</span></tt></a> for the list of them.</p>
+</div>
+<div class="section" id="document-relations">
+<h2>Document Relations<a class="headerlink" href="#document-relations" title="Permalink to this headline">¶</a></h2>
+<p>You can define a field type as another model document (or even recursively)
+within your structure. This simulates kind of foreign key scenario in the
+relational systems but you must know that every related document will be
+fetched separately from couchbase server as the nature of the non-relational
+systems. The good news is, couchbasekit fetches these related documents
+on-demand and caches them during the object&#8217;s life time.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">lonely_galaxy</span> <span class="o">=</span> <span class="n">Publisher</span><span class="p">(</span><span class="s">&#39;lonely_galaxy&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dna</span> <span class="o">=</span> <span class="n">Author</span><span class="p">(</span><span class="s">&#39;douglas_adams&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dna</span><span class="o">.</span><span class="n">publisher</span> <span class="o">=</span> <span class="n">lonely_galaxy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dna</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="go">4535519295771</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dna</span> <span class="o">=</span> <span class="n">Author</span><span class="p">(</span><span class="s">&#39;douglas_adams&#39;</span><span class="p">)</span> <span class="c"># retrieve the same doc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dna</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="s">&#39;publisher&#39;</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="go">u&#39;publisher_lonely_galaxy&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dna</span><span class="o">.</span><span class="n">load</span><span class="p">()</span> <span class="c"># fetch and cache all of its items</span>
+<span class="gp">... </span><span class="c"># output stripped out to keep here clean</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dna</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="s">&#39;publisher&#39;</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c"># no more raw, already cached</span>
+<span class="go">{u&#39;doc_type&#39;: u&#39;publisher&#39;, u&#39;created_at&#39;: u&#39;2012-11-18 16:24:16.784474+00:00&#39;, &#39;slug&#39;: u&#39;lonely_galaxy&#39;, u&#39;name&#39;: u&#39;Lonely Galaxy Press&#39;}</span>
+<span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pragmatic-document-relations">
+<h2>Pragmatic Document Relations<a class="headerlink" href="#pragmatic-document-relations" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes, you don&#8217;t know which model will be related for your field. As a
+meaningless example, you want to assign pillows to your pets:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">example.samples.pets</span> <span class="kn">import</span> <span class="n">Cat</span><span class="p">,</span> <span class="n">Dog</span><span class="p">,</span> <span class="n">Dragon</span>
+
+<span class="k">class</span> <span class="nc">Pillow</span><span class="p">(</span><span class="n">Document</span><span class="p">):</span>
+    <span class="n">__bucket_name__</span> <span class="o">=</span> <span class="s">&#39;couchbasekit_samples&#39;</span>
+    <span class="n">doc_type</span> <span class="o">=</span> <span class="s">&#39;pillow&#39;</span>
+    <span class="n">structure</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;material&#39;</span><span class="p">:</span> <span class="nb">unicode</span><span class="p">,</span>
+        <span class="s">&#39;price&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="s">&#39;pet&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">Cat</span><span class="p">,</span> <span class="n">Dog</span><span class="p">,</span> <span class="n">Dragon</span><span class="p">),</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>As you can see, <tt class="docutils literal"><span class="pre">pet</span></tt> field of each Pillow document can be assigned to
+<strong>either</strong> of these animals and special tuple operator was used to define it.
+This tuple operator is only used to define such pragmatic document relations
+and its members can be only model documents or you will get a
+<a class="reference internal" href="api-documentation.html#couchbasekit.errors.StructureError" title="couchbasekit.errors.StructureError"><tt class="xref py py-exc docutils literal"><span class="pre">couchbasekit.errors.StructureError</span></tt></a>.</p>
+</div>
+<div class="section" id="custom-fields">
+<h2>Custom Fields<a class="headerlink" href="#custom-fields" title="Permalink to this headline">¶</a></h2>
+<p>With couchbasekit, of course you can have your specific field types and a few
+of them may be already defined in <a class="reference internal" href="api-documentation.html#module-couchbasekit.fields" title="couchbasekit.fields"><tt class="xref py py-mod docutils literal"><span class="pre">couchbasekit.fields</span></tt></a>. Creating your own
+custom field is quite easy, please refer to
+<a class="reference internal" href="api-documentation.html#couchbasekit.fields.CustomField" title="couchbasekit.fields.CustomField"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.fields.CustomField</span></tt></a>.</p>
+<p>As an example, the password fields are salted randomly and encrypted on the
+fly, thus cannot be decrypted back:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">couchbasekit.fields</span> <span class="kn">import</span> <span class="n">PasswordField</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">raw</span> <span class="o">=</span> <span class="s">&#39;123456&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">PasswordField</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+<span class="go">&#39;$2a$12$1nshsN7Nt8e3.dPd1ZcA7uJnesu2sg52nZl6CX1N0ETZwc2UYCGYS&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">PasswordField</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+<span class="go">&#39;$2a$12$UyLdw0QwHJmONipuyQ3Mq.NA4YteHZ8NDwXFpaJP.xi9ZnUjmxvWa&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hashed</span> <span class="o">=</span> <span class="n">PasswordField</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hashed</span><span class="o">.</span><span class="n">value</span>
+<span class="go">&#39;$2a$12$r490Tn0zEaMYTf.dfjBNoe0I729Ej2Z18xTJLbwfqZyOXeabXZUky&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hashed</span><span class="o">.</span><span class="n">check_password</span><span class="p">(</span><span class="s">&#39;incorrect&#39;</span><span class="p">)</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hashed</span><span class="o">.</span><span class="n">check_password</span><span class="p">(</span><span class="s">&#39;123456&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="list-multi-value-fields">
+<h2>List (Multi Value) Fields<a class="headerlink" href="#list-multi-value-fields" title="Permalink to this headline">¶</a></h2>
+<p>You can also define a <tt class="xref py py-func docutils literal"><span class="pre">list()</span></tt> of values. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Book</span><span class="p">(</span><span class="n">Document</span><span class="p">):</span>
+    <span class="n">__bucket_name__</span> <span class="o">=</span> <span class="s">&#39;couchbasekit_samples&#39;</span>
+    <span class="n">doc_type</span> <span class="o">=</span> <span class="s">&#39;book&#39;</span>
+    <span class="n">structure</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="nb">unicode</span><span class="p">,</span>
+        <span class="s">&#39;published_at&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
+        <span class="s">&#39;pictures&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="s">&#39;tags&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">unicode</span><span class="p">],</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Note that if you are sure what type of elements a <cite>List Field</cite> will have,
+you should specify it explicitly <strong>only once</strong>. Otherwise just let it be
+<tt class="docutils literal"><span class="pre">list</span></tt> then it can have any combination of
+<a class="reference internal" href="api-documentation.html#couchbasekit.schema.ALLOWED_TYPES" title="couchbasekit.schema.ALLOWED_TYPES"><tt class="xref py py-const docutils literal"><span class="pre">couchbasekit.schema.ALLOWED_TYPES</span></tt></a>, a model document or
+a subclass of <a class="reference internal" href="api-documentation.html#couchbasekit.fields.CustomField" title="couchbasekit.fields.CustomField"><tt class="xref py py-class docutils literal"><span class="pre">couchbasekit.fields.CustomField</span></tt></a> as usual.</p>
+</div>
+<div class="section" id="nested-dictionary-fields">
+<h2>Nested Dictionary Fields<a class="headerlink" href="#nested-dictionary-fields" title="Permalink to this headline">¶</a></h2>
+<p>Some of your model documents may need complicated structure, such as
+pre-defined item types of a dictionary, deeply nested dictionary or
+totally schema-less sub-structures.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">One downside of such free dictionary models is that you can&#8217;t use
+attribute access (a.k.a. dot notation), so you have to use
+dictionary-like item access and the same rule applies for retrieving
+of your data.</p>
+</div>
+<p>First and easiest example would be a total schema-less model document:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FreeModel</span><span class="p">(</span><span class="n">Document</span><span class="p">):</span>
+    <span class="n">__bucket_name__</span> <span class="o">=</span> <span class="s">&#39;couchbasekit_samples&#39;</span>
+    <span class="n">doc_type</span> <span class="o">=</span> <span class="s">&#39;free&#39;</span>
+    <span class="n">structure</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="n">free</span> <span class="o">=</span> <span class="n">FreeModel</span><span class="p">()</span>
+<span class="c"># that does NOT work because &#39;somefield&#39; wasn&#39;t defined in the structure</span>
+<span class="n">free</span><span class="o">.</span><span class="n">somefield</span> <span class="o">=</span> <span class="s">&#39;some value&#39;</span>
+<span class="c"># but that will work:</span>
+<span class="n">free</span><span class="p">[</span><span class="s">&#39;somefield&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;some value&#39;</span>
+<span class="c"># and those also will work as the Document class is a dictionary itself!</span>
+<span class="n">free</span> <span class="o">=</span> <span class="n">FreeModel</span><span class="p">(</span><span class="n">somefield</span><span class="o">=</span><span class="s">&#39;some value&#39;</span><span class="p">,</span> <span class="n">listfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;list&#39;</span><span class="p">,</span> <span class="s">&#39;of&#39;</span><span class="p">,</span> <span class="s">&#39;items&#39;</span><span class="p">])</span>
+<span class="c"># or:</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;somefield&#39;</span><span class="p">:</span> <span class="s">&#39;some value&#39;</span><span class="p">,</span> <span class="s">&#39;listfield&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;list&#39;</span><span class="p">,</span> <span class="s">&#39;of&#39;</span><span class="p">,</span> <span class="s">&#39;items&#39;</span><span class="p">]}</span>
+<span class="n">free</span> <span class="o">=</span> <span class="n">FreeModel</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want a semi schema-less structure on a specific field that means you
+know it will be dictionary and what type for its keys and values will be, you
+may define only types for its key-value pair:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">Document</span><span class="p">):</span>
+    <span class="n">__bucket_name__</span> <span class="o">=</span> <span class="s">&#39;couchbasekit_samples&#39;</span>
+    <span class="n">doc_type</span> <span class="o">=</span> <span class="s">&#39;user&#39;</span>
+    <span class="n">structure</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;username&#39;</span><span class="p">:</span> <span class="nb">unicode</span><span class="p">,</span>
+        <span class="s">&#39;email&#39;</span><span class="p">:</span> <span class="n">EmailField</span><span class="p">,</span>
+        <span class="s">&#39;password&#39;</span><span class="p">:</span> <span class="n">PasswordField</span><span class="p">,</span>
+        <span class="s">&#39;logins&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="c"># datetime: ip</span>
+            <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">:</span> <span class="nb">unicode</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Please note that for the type specified free dictionaries, like the
+one above, the key of that dictionary must be <tt class="xref py py-func docutils literal"><span class="pre">hash()</span></tt>&#8216;able as
+it is required by Python dictionaries. This means you can&#8217;t use a
+<tt class="xref py py-func docutils literal"><span class="pre">list()</span></tt> or a model document instance for such keys.</p>
+</div>
+<p>Finally, deeply nested dictionary fields:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Book</span><span class="p">(</span><span class="n">Document</span><span class="p">):</span>
+    <span class="n">__bucket_name__</span> <span class="o">=</span> <span class="s">&#39;couchbasekit_samples&#39;</span>
+    <span class="n">doc_type</span> <span class="o">=</span> <span class="s">&#39;book&#39;</span>
+    <span class="n">structure</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="nb">unicode</span><span class="p">,</span>
+        <span class="s">&#39;published_at&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
+        <span class="s">&#39;pictures&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="s">&#39;tags&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">unicode</span><span class="p">],</span>
+        <span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">u&#39;History&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+            <span class="s">u&#39;Sci-Fiction&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+            <span class="s">u&#39;Cooking&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">u&#39;Turkish&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                <span class="s">u&#39;Italian&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                <span class="s">u&#39;Fast Food&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                <span class="s">u&#39;Desert&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Please note that again; dot notation does <strong>not</strong> work for deeply nested
+dictionaries either. So you can&#8217;t check or set of a book&#8217;s <cite>Desert</cite>
+category by dot notation:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">book</span> <span class="o">=</span> <span class="n">Book</span><span class="p">(</span><span class="s">&#39;ad45556b3ba4&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">book</span><span class="o">.</span><span class="n">category</span> <span class="ow">is</span> <span class="bp">None</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">book</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">Cooking</span><span class="o">.</span><span class="n">Desert</span> <span class="c"># wrong!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">book</span><span class="o">.</span><span class="n">category</span><span class="p">[</span><span class="s">&#39;Cooking&#39;</span><span class="p">][</span><span class="s">&#39;Desert&#39;</span><span class="p">]</span> <span class="c"># correct</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">book</span><span class="o">.</span><span class="n">category</span><span class="p">[</span><span class="s">&#39;Sci-Fiction&#39;</span><span class="p">]</span> <span class="c"># correct</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">book</span><span class="o">.</span><span class="n">category</span><span class="p">[</span><span class="s">&#39;Cooking&#39;</span><span class="p">][</span><span class="s">&#39;Fast Food&#39;</span><span class="p">]</span> <span class="c"># correct</span>
+</pre></div>
+</div>
+<p>Use dictionary-like item assignments if they&#8217;re not defined yet:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">book</span> <span class="o">=</span> <span class="n">Book</span><span class="p">(</span><span class="s">&#39;ad45556b3ba4&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">book</span><span class="o">.</span><span class="n">category</span> <span class="ow">is</span> <span class="bp">None</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">book</span><span class="o">.</span><span class="n">category</span><span class="p">[</span><span class="s">&#39;History&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span> <span class="c"># wrong!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">book</span><span class="p">[</span><span class="s">&#39;category&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">u&#39;History&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span> <span class="c"># correct</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Document Structure</a><ul>
+<li><a class="reference internal" href="#allowed-types">Allowed Types</a></li>
+<li><a class="reference internal" href="#document-relations">Document Relations</a></li>
+<li><a class="reference internal" href="#pragmatic-document-relations">Pragmatic Document Relations</a></li>
+<li><a class="reference internal" href="#custom-fields">Custom Fields</a></li>
+<li><a class="reference internal" href="#list-multi-value-fields">List (Multi Value) Fields</a></li>
+<li><a class="reference internal" href="#nested-dictionary-fields">Nested Dictionary Fields</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="model-document.html"
+                        title="previous chapter">Model Document</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api-documentation.html"
+                        title="next chapter">API Documentation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/structure.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api-documentation.html" title="API Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="model-document.html" title="Model Document"
+             >previous</a> |</li>
+        <li><a href="index.html">couchbasekit 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Roy Enjoy (aka &#39;kirpit&#39;).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
