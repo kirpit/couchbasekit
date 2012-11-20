@@ -182,16 +182,20 @@ Finally, deeply nested dictionary fields::
 
 .. note::
     Please note that again; dot notation does **not** work for deeply nested
-    dictionaries either. So you can't check if a book is a `Desert` cooking
-    book by dot notation:
+    dictionaries either. So you can't check or set of a book's `Desert`
+    category by dot notation:
 
+    >>> book = Book('ad45556b3ba4')
+    >>> book.category is None
+    False
     >>> book.category.Cooking.Desert # wrong!
     >>> book.category['Cooking']['Desert'] # correct
     >>> book.category['Sci-Fiction'] # correct
     >>> book.category['Cooking']['Fast Food'] # correct
 
-    and you can't assign them if they're not defined yet:
+    Use dictionary-like item assignments if they're not defined yet:
 
+    >>> book = Book('ad45556b3ba4')
     >>> book.category is None
     True
     >>> book.category['History'] = False # wrong!

@@ -70,9 +70,9 @@ class Document(SchemaDocument):
         return super(Document, self).__getattribute__(item)
 
     def __setattr__(self, key, value):
-        #import pdb; pdb.set_trace()
-        # bug here
-        if key in self.structure:
+        # always use getattr!
+        # NOT hasattr cuz it returns True if defined in structure but not exist
+        if getattr(self, key) is None and key in getattr(self, 'structure'):
             self[key] = value
         else:
             super(Document, self).__setattr__(key, value)
@@ -220,14 +220,13 @@ class Document(SchemaDocument):
         self.validate()
         # always timezone "aware" datetimes and times
         self._make_offset_aware()
-        # json safe
-        pickler = jsonpickle.Pickler(unpicklable=False)
-        json_safe = pickler.flatten(self._json_safe(self))
+        # json safe data
+        json_data = jsonpickle.encode(self._json_safe(self))
         # still no key identifier? create one..
         if self.doc_id is None:
-            self._hashed_key = hashlib.sha1(json_safe).hexdigest()[0:12]
+            self._hashed_key = hashlib.sha1(json_data).hexdigest()[0:12]
         # finally
-        self.cas_value = self.bucket.set(self.doc_id, expiry, 0, json_safe)[1]
+        self.cas_value = self.bucket.set(self.doc_id, expiry, 0, json_data)[1]
         return self.cas_value
 
     def view(self, view=None):
