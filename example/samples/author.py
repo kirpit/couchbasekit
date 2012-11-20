@@ -23,8 +23,7 @@ class Author(Document):
         'gender': Gender,
         'email': EmailField,
         'publisher': Publisher, # kind of foreign key
-        # that could be a [Book] too which may repeat its items:
-        'books': {Book}, # a Python set type, 1-to-many
+        'books': [Book], # 1-to-many
         'has_book': bool,
         'age': int,
         'birthday': datetime.date,

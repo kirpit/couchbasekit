@@ -26,7 +26,6 @@ definitions::
         unicode,
         basestring,
         list,
-        set,
         dict,
         datetime.datetime,
         datetime.date,
