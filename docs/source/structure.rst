@@ -175,21 +175,21 @@ Finally, deeply nested dictionary fields::
                     u'Turkish': bool,
                     u'Italian': bool,
                     u'Fast Food': bool,
-                    u'Desert': bool,
+                    u'Dessert': bool,
                 },
             },
         }
 
 .. note::
     Please note that again; dot notation does **not** work for deeply nested
-    dictionaries either. So you can't check or set of a book's `Desert`
+    dictionaries either. So you can't check or set of a book's `Dessert`
     category by dot notation:
 
     >>> book = Book('ad45556b3ba4')
     >>> book.category is None
     False
-    >>> book.category.Cooking.Desert # wrong!
-    >>> book.category['Cooking']['Desert'] # correct
+    >>> book.category.Cooking.Dessert # wrong!
+    >>> book.category['Cooking']['Dessert'] # correct
     >>> book.category['Sci-Fiction'] # correct
     >>> book.category['Cooking']['Fast Food'] # correct
 

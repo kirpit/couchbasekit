@@ -17,7 +17,7 @@ class Book(Document):
                 u'Turkish': bool,
                 u'Italian': bool,
                 u'Fast Food': bool,
-                u'Desert': bool,
+                u'Dessert': bool,
             },
         },
     }
