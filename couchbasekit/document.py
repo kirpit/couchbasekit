@@ -70,10 +70,10 @@ class Document(SchemaDocument):
         return super(Document, self).__getattribute__(item)
 
     def __setattr__(self, key, value):
-        # always use getattr!
+        # always use getattr to check!
         # NOT hasattr cuz it returns True if defined in structure but not exist
         if getattr(self, key) is None and key in getattr(self, 'structure'):
-            self[key] = value
+            self[unicode(key)] = value
         else:
             super(Document, self).__setattr__(key, value)
 
@@ -216,7 +216,7 @@ class Document(SchemaDocument):
             if callable(value): value = value()
             self.setdefault(key, value)
         # validate
-        self['doc_type'] = unicode(self.doc_type)
+        self[u'doc_type'] = unicode(self.doc_type)
         self.validate()
         # always timezone "aware" datetimes and times
         self._make_offset_aware()
