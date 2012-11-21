@@ -221,7 +221,7 @@ class Document(SchemaDocument):
         # always timezone "aware" datetimes and times
         self._make_offset_aware()
         # json safe data
-        json_data = jsonpickle.encode(self._json_safe(self))
+        json_data = jsonpickle.encode(self._json_safe(self), unpicklable=False)
         # still no key identifier? create one..
         if self.doc_id is None:
             self._hashed_key = hashlib.sha1(json_data).hexdigest()[0:12]
