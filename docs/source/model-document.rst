@@ -45,7 +45,7 @@ to prefix your document IDs either.
 structure (required)
 --------------------------
 Structure definition dictionary is a wide topic, therefore explained in
-another section. See :ref:`document-structure`.
+another section. See :ref:`model-document-structure`.
 
 __key_field__ (optional)
 --------------------------
