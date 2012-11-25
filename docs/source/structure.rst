@@ -112,7 +112,7 @@ totally schema-less sub-structures.
 .. warning::
     One downside of such free dictionary models is that you can't use
     attribute access (a.k.a. dot notation), so you have to use
-    dictionary-like item access and the same rule applies for retrieving
+    dictionary-like item assignment and the same rule applies for retrieving
     of your data.
 
 First and easiest example would be a total schema-less model document::
