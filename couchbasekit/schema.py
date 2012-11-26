@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 """
-    couchbasekit.schema
-    ~~~~~~~~~~~~~~~~~~~
+couchbasekit.schema
+~~~~~~~~~~~~~~~~~~~
 
-    :website: http://github.com/kirpit/couchbasekit
-    :copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.
-    :license: MIT, see LICENSE for details.
+:website: http://github.com/kirpit/couchbasekit
+:copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
+:license: MIT, see LICENSE.txt for details.
 """
 from abc import ABCMeta
 import datetime
@@ -56,13 +56,13 @@ class SchemaDocument(dict):
         if not isinstance(self.__bucket_name__, str) or \
            not isinstance(self.doc_type, str) or \
            not isinstance(self.structure, dict):
-            raise self.StructureError(msg='Structure is not properly set '
-                                          'for %s.' % type(self).__name__)
+            raise self.StructureError(msg="Structure is not properly "
+                                          "set for %s." % type(self).__name__)
         # check self.__key_field__ if correct
         if self.__key_field__ and self.__key_field__ not in self.structure:
             raise self.StructureError(
-                msg='Document key field must be within the structure, '
-                    '"%s" is given.' % str(self.__key_field__)
+                msg="Document key field must be within the "
+                    "structure, '%s' is given." % str(self.__key_field__)
             )
         # insert doc_type into the structure
         self.structure.update(doc_type=basestring)
@@ -306,7 +306,7 @@ class SchemaDocument(dict):
                 if (rfield not in mapping and rfield not in self.default_values) or \
                    (rfield in mapping and mapping[rfield] is None):
                     raise self.StructureError(
-                        msg='Required field for "%s" is missing.' % rfield
+                        msg="Required field for '%s' is missing." % rfield
                     )
         # check the dict structure
         for skey, svalue in structure.iteritems():
@@ -316,8 +316,8 @@ class SchemaDocument(dict):
                 # if it's a type pair, must be the only item
                 if not len(structure)==1:
                     raise self.StructureError(
-                        msg='Type pairs must be the only item in a dictionary, '
-                            'there are %d.' % len(structure)
+                        msg="Type pairs must be the only item in a dictionary, "
+                            "there are %d." % len(structure)
                     )
                 # key instance must be hash()'able at this point
                 # but we can't catch'em all as every instance is
@@ -326,8 +326,8 @@ class SchemaDocument(dict):
                 except TypeError as why:
                     if 'unhashable type' in why.message:
                         raise self.StructureError(
-                            msg='Structure keys must be hashable, '
-                                '"%s" given.' % skey.__name__
+                            msg="Structure keys must be hashable, "
+                                "'%s' given." % skey.__name__
                         )
                     # yes, we ignore the rest of TypeErrors
                     pass
@@ -335,20 +335,20 @@ class SchemaDocument(dict):
                 for k in mapping.iterkeys():
                     if not isinstance(k, skey):
                         raise self.StructureError(k, skey, k)
-                # structure value is a list
+                # structure value is a list [instance]
                 if isinstance(svalue, list):
                     # and must have only 1 item
                     if not len(svalue)==1:
                         raise self.StructureError(
-                            msg='List values must have only 1 item, '
-                                '"%s" had %d.' % (skey, len(svalue))
+                            msg="List values must have only 1 item, "
+                                "'%s' had %d." % (skey, len(svalue))
                         )
                     elif not (isinstance(svalue[0], type) and
                               (svalue[0] in ALLOWED_TYPES or
                                issubclass(svalue[0], (CustomField, SchemaDocument)))):
                         raise self.StructureError(
-                            msg='A list has an invalid option in its '
-                                'structure, "%s" is given.' % svalue[0]
+                            msg="A list has an invalid option in its "
+                                "structure, '%s' is given." % svalue[0]
                         )
                     for k, v in mapping.iteritems():
                         if not isinstance(v, svalue[0]):
@@ -357,14 +357,12 @@ class SchemaDocument(dict):
                 elif isinstance(svalue, tuple):
                     invalid = next([sv for sv in svalue
                                     if not (isinstance(sv, type) and
-                                            issubclass(sv, SchemaDocument) and
-                                            getattr(sv, '__key_field__'))],
+                                            issubclass(sv, SchemaDocument))],
                                     None)
                     if invalid is not None:
                         raise self.StructureError(
-                            msg='A tuple structure must have only Document type '
-                                'options and "__key_field__" attributes cannot be '
-                                'undefined, "%s" is given.' % invalid
+                            msg="A tuple defined field must have only model "
+                                "documents as options, '%s' is given." % invalid
                         )
                     for k, v in mapping.iteritems():
                         if not isinstance(v, svalue): # within the tuple
@@ -389,13 +387,13 @@ class SchemaDocument(dict):
                  issubclass(svalue, (CustomField, SchemaDocument)) and \
                  isinstance(mapping[skey], svalue):
                 continue
-            # structure value is a list
+            # structure value is a list [instance]
             elif isinstance(svalue, list):
                 # and must have only 1 item
                 if not len(svalue)==1:
                     raise self.StructureError(
-                        msg='List values must have only 1 item, '
-                            '"%s" had %d.' % (skey, len(svalue))
+                        msg="List values must have only 1 item, "
+                            "'%s' had %d." % (skey, len(svalue))
                     )
                 if isinstance(svalue[0], type) and \
                      (svalue[0] in ALLOWED_TYPES or
@@ -406,8 +404,7 @@ class SchemaDocument(dict):
             # structure value is a tuple, all must be Document instances
             elif isinstance(svalue, tuple):
                 if all([isinstance(sv, type) and
-                        issubclass(sv, SchemaDocument) and
-                        getattr(sv, '__key_field__') for sv in svalue]) and \
+                        issubclass(sv, SchemaDocument) for sv in svalue]) and \
                    isinstance(mapping[skey], svalue): # within the tuple
                     continue
             # it's a dictionary instance, check recursively
@@ -431,7 +428,7 @@ class SchemaDocument(dict):
         """
         # __key_field__ value must be provided if defined
         if self.__key_field__ and self.__key_field__ not in self:
-            raise self.StructureError(msg='Key field "%s" is defined '
-                                     'but not provided.' % self.__key_field__)
+            raise self.StructureError(msg="Key field '%s' is defined "
+                                          "but not provided." % self.__key_field__)
         self.load()
         return self._validate(self.structure, self, root=True)

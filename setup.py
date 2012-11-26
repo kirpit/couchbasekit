@@ -1,20 +1,22 @@
 #! /usr/bin/env python
 from distutils.core import setup
+from couchbasekit import __version__
+
 
 setup(
     name = 'couchbasekit',
-    version = '0.1.0',
+    version = __version__,
     author = 'Roy Enjoy',
     author_email = 'kirpit@gmail.com',
-    packages = ['couchbasekit', ],
+    packages = ['couchbasekit'],
     url = 'https://github.com/kirpit/couchbasekit',
     license = 'LICENSE.txt',
     description = 'A wrapper around couchbase driver for document validation and more.',
-    long_description = open('README.txt').read(),
+    long_description = open('README.rst').read(),
     install_requires = [
         'couchbase>=0.8.1',
-        'jsonpickle>=0.4.0',
-        'python-dateutil>=2.1',
-        #'py-bcrypt>=0.2', # (optional for couchbasekit.fields.PasswordField)
+        'jsonpickle',
+        'python-dateutil',
+        #'py-bcrypt', # optional for couchbasekit.fields.PasswordField
     ],
 )

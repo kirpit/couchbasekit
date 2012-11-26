@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 """
-    couchbasekit.document
-    ~~~~~~~~~~~~~~~~~~~~~
+couchbasekit.document
+~~~~~~~~~~~~~~~~~~~~~
 
-    :website: http://github.com/kirpit/couchbasekit
-    :copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.
-    :license: MIT, see LICENSE for details.
+:website: http://github.com/kirpit/couchbasekit
+:copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
+:license: MIT, see LICENSE.txt for details.
 """
 import datetime
 import hashlib
@@ -133,24 +133,24 @@ class Document(SchemaDocument):
         # root
         if mapping is None:
             mapping = self
+        naive_types = (datetime.datetime, datetime.time)
         for key, value in mapping.iteritems():
             new_key, new_value = key, value
-            # key
-            if isinstance(key, (datetime.datetime, datetime.time)) and \
-               key.tzinfo is None:
+            # timezone naive key
+            if isinstance(key, naive_types) and key.tzinfo is None:
                 new_key = key.replace(tzinfo=tzutc())
                 del mapping[key]
             # timezone naive value
-            if isinstance(value, (datetime.datetime, datetime.time)) and \
-               value.tzinfo is None:
+            if isinstance(value, naive_types) and value.tzinfo is None:
                 new_value = value.replace(tzinfo=tzutc())
             # list
             elif isinstance(value, list) and len(value) and \
-                 all([isinstance(v, (datetime.datetime, datetime.time))
-                      for v in value]):
+                 any([isinstance(v, naive_types) for v in value]):
                 new_value = list()
-                map(lambda v: new_value.append(v),
-                    [v.replace(tzinfo=tzutc()) for v in value])
+                for v in value:
+                    if isinstance(v, naive_types):
+                        v = v.replace(tzinfo=tzutc())
+                    new_value.append(v)
             # recursive value
             elif isinstance(value, dict):
                 new_value = self._make_offset_aware(value)
@@ -166,12 +166,9 @@ class Document(SchemaDocument):
             # KEY
             # Document instance
             if isinstance(key, Document):
-                if key.doc_id is None:
-                    raise self.StructureError(
-                        msg='Trying to relate an unsaved '
-                            'document; "%s"' % type(key).__name__
-                    )
-                key = key.doc_id
+                # document instances are not hashable!
+                # should raise an error here
+                pass
             # CustomField instance
             elif isinstance(key, CustomField):
                 key = key.value
@@ -185,8 +182,8 @@ class Document(SchemaDocument):
             if isinstance(value, Document):
                 if value.doc_id is None:
                     raise self.StructureError(
-                        msg='Trying to relate an unsaved '
-                            'document; "%s"' % type(value).__name__
+                        msg="Trying to relate an unsaved "
+                            "document; '%s'" % type(value).__name__
                     )
                 value = value.doc_id
             # CustomField instance

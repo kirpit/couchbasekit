@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 """
-    couchbasekit.connection
-    ~~~~~~~~~~~~~~~~~~~~~~~
+couchbasekit.connection
+~~~~~~~~~~~~~~~~~~~~~~~
 
-    :website: http://github.com/kirpit/couchbasekit
-    :copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.
-    :license: MIT, see LICENSE for details.
+:website: http://github.com/kirpit/couchbasekit
+:copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
+:license: MIT, see LICENSE.txt for details.
 """
 from couchbase import Couchbase
 from couchbasekit.errors import CredentialsNotSetError

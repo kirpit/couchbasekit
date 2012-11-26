@@ -1,16 +1,16 @@
 #! /usr/bin/env python
 """
-    couchbasekit.fields
-    ~~~~~~~~~~~~~~~~~~~
+couchbasekit.fields
+~~~~~~~~~~~~~~~~~~~
 
-    :website: http://github.com/kirpit/couchbasekit
-    :copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.
-    :license: MIT, see LICENSE for details.
+:website: http://github.com/kirpit/couchbasekit
+:copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
+:license: MIT, see LICENSE.txt for details.
 
-    * :class:`couchbasekit.fields.CustomField`
-    * :class:`couchbasekit.fields.ChoiceField`
-    * :class:`couchbasekit.fields.EmailField`
-    * :class:`couchbasekit.fields.PasswordField`
+* :class:`couchbasekit.fields.CustomField`
+* :class:`couchbasekit.fields.ChoiceField`
+* :class:`couchbasekit.fields.EmailField`
+* :class:`couchbasekit.fields.PasswordField`
 """
 from abc import ABCMeta
 
@@ -51,7 +51,7 @@ class CustomField(object):
         :rtype: unicode
         """
         if not isinstance(self._value, basestring):
-            raise ValueError('%s\'s "value" is not set.' % type(self).__name__)
+            raise ValueError("%s's 'value' is not set." % type(self).__name__)
         return self._value
 
     @value.setter
@@ -95,15 +95,12 @@ class ChoiceField(CustomField):
 
     def __init__(self, choice):
         if not isinstance(self.CHOICES, dict) or not len(self.CHOICES):
-            raise AttributeError('ChoiceFields must have dictionary "CHOICES" '
-                                 'attribute and cannot be empty.')
+            raise AttributeError("ChoiceFields must have dictionary 'CHOICES' "
+                                 "attribute and cannot be empty.")
         if choice not in self.CHOICES:
-            raise ValueError('Default choice for %s must be '
-                             'within the "CHOICES" attribute.'
+            raise ValueError("Default choice for %s must be "
+                             "within the 'CHOICES' attribute."
                              % type(self).__name__)
-        # discard lazy translations, get unicode of each key-value
-        self.CHOICES = dict((unicode(k), unicode(v))
-                            for k, v in self.CHOICES.iteritems())
         self.value = choice
 
     @property
@@ -113,6 +110,9 @@ class ChoiceField(CustomField):
         :rtype: unicode
         """
         return self.CHOICES.get(self.value)
+
+    def iteritems(self):
+        return self.CHOICES.iteritems()
 
 
 class EmailField(CustomField):
@@ -128,7 +128,7 @@ class EmailField(CustomField):
     """
     def __init__(self, email):
         if not self.is_valid(email):
-            raise ValueError('Email address is invalid.')
+            raise ValueError("Email address is invalid.")
         self.value = email
 
     @staticmethod
@@ -141,6 +141,7 @@ class EmailField(CustomField):
         :rtype: bool
         """
         # TODO: validate email address
+        RuntimeWarning('EmailField.is_valid() method is not implemented yet.')
         return True
 
 
@@ -157,7 +158,7 @@ class PasswordField(CustomField):
     LOG_ROUNDS = 12
     def __init__(self, password):
         if not isinstance(password, basestring):
-            raise ValueError('Password must be a string or unicode.')
+            raise ValueError("Password must be a string or unicode.")
         # do the encryption if raw password provided
         if not password.startswith(('$2a$', '$2y$')):
             bcrypt = self.get_bcrypt()
@@ -173,8 +174,8 @@ class PasswordField(CustomField):
         """
         try: import bcrypt
         except ImportError:
-            raise ImportError('PasswordField requires "py-bcrypt" '
-                              'library to hash the passwords.')
+            raise ImportError("PasswordField requires 'py-bcrypt' "
+                              "library to hash the passwords.")
         else: return bcrypt
 
     def check_password(self, raw_password):

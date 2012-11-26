@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 """
-    couchbasekit.errors
-    ~~~~~~~~~~~~~~~~~~~
+couchbasekit.errors
+~~~~~~~~~~~~~~~~~~~
 
-    :website: http://github.com/kirpit/couchbasekit
-    :copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.
-    :license: MIT, see LICENSE for details.
+:website: http://github.com/kirpit/couchbasekit
+:copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
+:license: MIT, see LICENSE.txt for details.
 """
 
 class CouchbasekitException(Exception):
@@ -35,7 +35,7 @@ class DoesNotExist(CouchbasekitException):
             pass
     """
     def __init__(self, obj, key):
-        msg = '{doc} document with the key "{key}" not found.'.format(
+        msg = "{doc} document with the key '{key}' not found.".format(
             doc=type(obj).__name__,
             key=key,
         )
@@ -63,8 +63,8 @@ class StructureError(CouchbasekitException):
                 given = ', '.join((type(g).__name__ for g in given))
             else:
                 given = type(given).__name__
-            msg = '"{key}" does not fit the required structure, ' \
-                  'expected "{exp}" but "{given}" is given.'.format(
+            msg = "'{key}' does not fit the required structure, " \
+                  "expected '{exp}' but '{given}' is given.".format(
                 key=key,
                 exp=exp,
                 given=given,

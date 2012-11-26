@@ -1,7 +1,7 @@
 .. _model-document-structure:
 
 Model Document Structure
-==================
+========================
 Structure definition dictionary is the most important part of your model
 document. They are similar to table fields in relational SQL systems in a way.
 You simply need to define them as key-value that corresponds to
