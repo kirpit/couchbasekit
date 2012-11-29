@@ -367,7 +367,7 @@ class SchemaDocument(dict):
                     for k, v in mapping.iteritems():
                         if not isinstance(v, svalue): # within the tuple
                             raise self.StructureError(k, svalue, v)
-                # structure value is an ALLOWED_TYPE or CustomField
+                # structure value is an ALLOWED_TYPE, CustomField or Document
                 elif svalue in ALLOWED_TYPES or \
                      (isinstance(svalue, type) and
                       issubclass(svalue, (CustomField, SchemaDocument))):
@@ -377,7 +377,7 @@ class SchemaDocument(dict):
                 continue
             # STRUCTURE KEY (FIELD) IS A STRING
             # field not set or None anyway
-            if skey not in mapping or mapping[skey] is None:
+            if skey not in mapping or mapping.get(skey) is None:
                 continue
             # is it in allowed types?
             elif svalue in ALLOWED_TYPES and isinstance(mapping[skey], svalue):
@@ -385,7 +385,7 @@ class SchemaDocument(dict):
             # some custom type or document relation?
             elif isinstance(svalue, type) and \
                  issubclass(svalue, (CustomField, SchemaDocument)) and \
-                 isinstance(mapping[skey], svalue):
+                 isinstance(mapping.get(skey), svalue):
                 continue
             # structure value is a list [instance]
             elif isinstance(svalue, list):
@@ -414,7 +414,7 @@ class SchemaDocument(dict):
                 if self._validate(svalue, mapping[skey]):
                     continue
             # houston, we got a problem!
-            raise self.StructureError(skey, svalue, mapping[skey])
+            raise self.StructureError(skey, svalue, mapping.get(skey))
         return True
 
     def validate(self):
@@ -430,5 +430,4 @@ class SchemaDocument(dict):
         if self.__key_field__ and self.__key_field__ not in self:
             raise self.StructureError(msg="Key field '%s' is defined "
                                           "but not provided." % self.__key_field__)
-        self.load()
         return self._validate(self.structure, self, root=True)
