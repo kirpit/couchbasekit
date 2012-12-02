@@ -13,7 +13,7 @@ and more.
 from couchbasekit.connection import Connection
 from couchbasekit.document import Document
 
-__version__ = '0.1.1-dev'
+__version__ = '0.1.1'
 
 __all__ = (
     Connection,

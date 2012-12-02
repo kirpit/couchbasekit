@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 import datetime
-from couchbasekit import Document
+from couchbasekit import Document, Connection
+
+Connection.auth('couchbasekit_samples', 'couchbasekit')
 
 class Book(Document):
     __bucket_name__ = 'couchbasekit_samples'

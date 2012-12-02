@@ -52,8 +52,8 @@ class StructureError(CouchbasekitException):
             # get "expected" type name
             if isinstance(exp, type):
                 exp = exp.__name__
-            elif isinstance(exp, (tuple, list)):
-                exp = ', '.join((e.__name__ for e in exp if hasattr(e, '__name__')))
+            elif isinstance(exp, list) and len(exp)==1:
+                exp = 'list of %s' % exp[0].__name__
             else:
                 exp = type(exp).__name__
             # get "given" type name
@@ -64,7 +64,7 @@ class StructureError(CouchbasekitException):
             else:
                 given = type(given).__name__
             msg = "'{key}' does not fit the required structure, " \
-                  "expected '{exp}' but '{given}' is given.".format(
+                  "expected {exp} but '{given}' is given.".format(
                 key=key,
                 exp=exp,
                 given=given,

@@ -65,202 +65,90 @@ class SchemaDocument(dict):
                     "structure, '%s' is given." % str(self.__key_field__)
             )
         # insert doc_type into the structure
-        self.structure.update(doc_type=basestring)
+        self.structure.update(doc_type=unicode)
         seq = seq if isinstance(seq, dict) else {}
         super(SchemaDocument, self).__init__(seq, **kwargs)
 
-    def _convert_dict_item(self, structure, mapping):
-        """Converts the given mapping against the given structure, recursively.
-        This is quite code duplicate for :meth:`__getitem__` function.
-
-        :type structure: dict
-        :type mapping: dict
-        :returns: Converted dictionary.
-        :rtype: dict
-        """
-        new_map = dict()
+    def _decode_dict(self, structure, mapping):
         for skey, svalue in structure.iteritems():
+            map_keys = mapping.keys()
             # this is a type:type structure
-            if isinstance(skey, type) and isinstance(svalue, type):
-                mkeys, mvalues = mapping.keys(), mapping.values()
-                new_keys, new_values = mkeys, mvalues
-                # convert keys if needed
-                if skey not in (unicode, datetime.datetime,
-                                datetime.date, datetime.time) and \
-                   all((not isinstance(k, skey) for k in mkeys)):
-                    new_keys = list()
-                    map(lambda k: new_keys.append(k), [skey(k) for k in mkeys])
-                elif skey is datetime.datetime and \
-                     all((not isinstance(k, skey) for k in mkeys)):
-                    new_keys = list()
-                    map(lambda k: new_keys.append(k), [parse(k) for k in mkeys])
-                elif skey is datetime.date and \
-                     all((not isinstance(k, skey) for k in mkeys)):
-                    new_keys = list()
-                    map(lambda k: new_keys.append(k), [parse(k).date()
-                                                       for k in mkeys])
-                elif skey is datetime.time and \
-                     all((not isinstance(k, skey) for k in mkeys)):
-                    new_keys = list()
-                    map(lambda k: new_keys.append(k), [parse(k).timetz()
-                                                       for k in mkeys])
-                # convert values if needed
-                if svalue not in (unicode, datetime.datetime,
-                                  datetime.date, datetime.time) and \
-                   all((not isinstance(v, svalue) for v in mvalues)):
-                    new_values = list()
-                    map(lambda v: new_values.append(v), [svalue(v) for v in mvalues])
-                elif svalue is datetime.datetime and \
-                     all((not isinstance(v, svalue) for v in mvalues)):
-                    new_values = list()
-                    map(lambda v: new_values.append(v), [parse(v) for v in mvalues])
-                elif svalue is datetime.date and \
-                     all((not isinstance(v, svalue) for v in mvalues)):
-                    new_values = list()
-                    map(lambda v: new_values.append(v), [parse(v).date()
-                                                         for v in mvalues])
-                elif svalue is datetime.time and \
-                     all((not isinstance(v, svalue) for v in mvalues)):
-                    new_values = list()
-                    map(lambda v: new_values.append(v), [parse(v).timetz()
-                                                         for v in mvalues])
-                # create the new_map
-                if new_keys is not mkeys or new_values is not mvalues:
-                    map(lambda (k,v): new_map.setdefault(k,v),
-                        zip(new_keys, new_values))
-                else:
-                    new_map = mapping
-                continue
+            if isinstance(skey, type) and \
+               any([not isinstance(k, skey) for k in map_keys]):
+                new_keys = [self._decode_item(skey, k) for k in map_keys]
+                new_values = [self._decode_item(svalue, v) for v in mapping.values()]
+                return dict(zip(new_keys, new_values))
+            # item is not within the mapping
             elif skey not in mapping:
                 continue
-            map_value = mapping[skey]
-            # datetime
-            if isinstance(svalue, datetime.datetime) and \
-                 isinstance(map_value, unicode):
-                # see: http://bugs.python.org/issue15873
-                # see: http://bugs.python.org/issue6641
-                new_value = parse(map_value)
-                new_map[skey] = new_value
-                continue
-            # date
-            elif isinstance(svalue, datetime.date) and \
-                 isinstance(map_value, unicode):
-                new_value = parse(map_value).date()
-                new_map[skey] = new_value
-                return new_value
-            # time
-            elif isinstance(svalue, datetime.time) and \
-                 isinstance(map_value, unicode):
-                # see: http://bugs.python.org/issue15873
-                # see: http://bugs.python.org/issue6641
-                new_value = parse(map_value).timetz()
-                new_map[skey] = new_value
-                return new_value
-            # this is a tuple of Document options
-            elif isinstance(svalue, tuple) and isinstance(map_value, unicode):
-                # do smart guessing
-                doc_type, key = map_value.split('_', 1)
-                for sv in svalue:
-                    if sv.doc_type!=doc_type:
-                        continue
-                        # found
-                    new_value = sv(key)
-                    new_map[skey] = new_value
-                    break
-                continue
-            # this is a sub dictionary (recursive)
-            elif isinstance(svalue, dict) and isinstance(map_value, dict):
-                new_map[skey] = self._convert_dict_item(svalue, map_value)
-                continue
-            # this is an ordinary mapping dict, original type is fine
-            new_map[skey] = svalue(map_value)
-        return new_map
+            # decode only mapping value
+            else:
+                mapping[skey] = self._decode_item(svalue, mapping.get(skey))
+        return mapping
 
-    def __getitem__(self, item, raw=False):
-        """Converts the requested dictionary item into Python value if it was
-        newly fetched from couchbase server and caches it.
 
-        :type item: str
-        :type raw: bool
-        :returns: Mixed; converted Python value that is defined in main document
-            structure.
-        :raises KeyError:
-        """
+    def _decode_item(self, stype, value):
+        new_value = value
+        safe_types = (bool, int, long, float, unicode, basestring, list, dict)
+        # newly created or safe type
+        if self.is_new_record or stype in safe_types:
+            return value
+        # fix datetime
+        elif stype is datetime.datetime and \
+             not isinstance(value, datetime.datetime):
+            # see: http://bugs.python.org/issue15873
+            # see: http://bugs.python.org/issue6641
+            new_value = parse(value)
+        # fix date
+        elif stype is datetime.date and not isinstance(value, datetime.date):
+            new_value = parse(value).date()
+        # fix time
+        elif stype is datetime.time and not isinstance(value, datetime.time):
+            # see: http://bugs.python.org/issue15873
+            # see: http://bugs.python.org/issue6641
+            new_value = parse(value).timetz()
+        # fix CustomField
+        elif isinstance(stype, type) and issubclass(stype, CustomField) and \
+             not isinstance(value, stype):
+            new_value = stype(value)
+        # fix document relation
+        elif isinstance(stype, type) and issubclass(stype, SchemaDocument) and \
+             not isinstance(value, stype):
+            if getattr(stype, '__key_field__') is not None:
+                doc_type, key = value.split('_', 1)
+                new_value = stype(key)
+            else:
+                new_value = stype(value)
+        # fix python list [instances]
+        elif isinstance(stype, list) and isinstance(value, list) and \
+             len(stype)==1 and any([not isinstance(v, stype[0]) for v in value]):
+            new_value = [self._decode_item(stype[0], v) for v in value]
+        # the type is a dict instance, decode recursively
+        elif isinstance(stype, dict) and isinstance(value, dict):
+            new_value = self._decode_dict(stype, value)
+
+        return new_value
+
+    def __getitem__(self, item):
         # usual error if key not found
         if item not in self:
             raise KeyError(item)
-        dict_value = super(SchemaDocument, self).__getitem__(item)
-        # newly created, field not in structure or the exact value was needed
-        if self.is_new_record is True or item not in self.structure or raw is True:
-            return dict_value
-        # HERE, THE THING STARTS
-        svalue = self.structure[item]
-        # no need to modify the item if one of these:
-        ok_types = (bool, int, long, float, unicode, basestring, list, dict)
-        if svalue in ok_types and isinstance(dict_value, ok_types):
-            return dict_value
-        # fix datetime string
-        elif svalue is datetime.datetime and \
-             not isinstance(dict_value, datetime.datetime):
-            # see: http://bugs.python.org/issue15873
-            # see: http://bugs.python.org/issue6641
-            new_value = parse(dict_value)
+        value = self.get(item)
+        # TODO: schemaless should be converted as well
+        # schemaless or out of structure
+        if item not in self.structure:
+            return value
+        # make sure the accessed value respects our structure
+        try:
+            new_value = self._decode_item(self.structure[item], value)
+        except ValueError as why:
+            raise ValueError(
+                "Incorrect value for the field %s, '%s' was given." % (item, value)
+            )
+        # cache it
+        if new_value is not value:
             self[item] = new_value
-            return new_value
-        # fix date string
-        elif svalue is datetime.date and \
-             not isinstance(dict_value, datetime.date):
-            new_value = parse(dict_value).date()
-            self[item] = new_value
-            return new_value
-        # fix time string
-        elif svalue is datetime.time and \
-             not isinstance(dict_value, datetime.time):
-            # see: http://bugs.python.org/issue15873
-            # see: http://bugs.python.org/issue6641
-            new_value = parse(dict_value).timetz()
-            self[item] = new_value
-            return new_value
-        # fix CustomField
-        elif isinstance(dict_value, unicode) and \
-             isinstance(svalue, type) and \
-             issubclass(svalue, CustomField):
-            new_value = svalue(dict_value)
-            self[item] = new_value
-            return new_value
-        # fix Document
-        elif isinstance(dict_value, unicode) and \
-             isinstance(svalue, type) and \
-             issubclass(svalue, SchemaDocument):
-            doc_type, key = dict_value.split('_', 1)
-            new_value = svalue(key)
-            self[item] = new_value
-            return new_value
-        # fix python list elements
-        elif isinstance(dict_value, list) and \
-             isinstance(svalue, list) and \
-             all((not isinstance(dv, svalue[0]) for dv in dict_value)):
-            new_value = list([type(svalue[0])(dv) for dv in dict_value])
-            self[item] = new_value
-            return new_value
-        # the type is a tuple, value must be an either Document instance in it
-        elif isinstance(svalue, tuple) and isinstance(dict_value, unicode):
-            # do smart guessing
-            doc_type, key = dict_value.split('_', 1)
-            for sv in svalue:
-                if sv.doc_type!=doc_type:
-                    continue
-                # found
-                new_value = sv(key)
-                self[item] = new_value
-                return new_value
-        # the type is dict instance, convert recursively
-        elif isinstance(svalue, dict) and isinstance(dict_value, dict):
-            new_value = self._convert_dict_item(svalue, dict_value)
-            self[item] = new_value
-            return new_value
-        # perhaps already converted
-        return dict_value
+        return new_value
 
     def load(self):
         """Helper function to pre-load all the raw document values into Python
@@ -276,30 +164,16 @@ class SchemaDocument(dict):
         ``user.posts``, you don't have to ``.load()`` it as they're
         auto-converted and cached on-demand.
 
-        Returns the instance itself so you can use it like:
+        Returns the instance itself (a.k.a. chaining) so you can do:
 
         >>> book = Book('hhg2g').load()
 
         :returns: The Document instance itself on which was called from.
         """
-        [self[k] for k in self.iterkeys()]
+        [getattr(self, k) for k in self.iterkeys()]
         return self
 
     def _validate(self, structure, mapping, root=False):
-        """Recursive validation for the given structure against the given
-        mapping dictionary.
-
-        :param structure: The structure (or a sub-structure) to validate.
-        :type structure: dict
-        :param mapping: The values dictionary to be checked against.
-        :type mapping: dict
-        :param root: True if it was first called from :meth:`validate`.
-        :type root: bool
-        :returns: Always True, or raises
-            :exc:`couchbasekit.errors.StructureError` exception.
-        :raises: :exc:`couchbasekit.errors.StructureError` if any validation
-            problem occurs.
-        """
         # if root, check the required fields first
         if root is True:
             for rfield in self.required_fields:
@@ -350,23 +224,9 @@ class SchemaDocument(dict):
                             msg="A list has an invalid option in its "
                                 "structure, '%s' is given." % svalue[0]
                         )
-                    for k, v in mapping.iteritems():
-                        if not isinstance(v, svalue[0]):
-                            raise self.StructureError(k, svalue[0], v)
-                # structure value is a tuple, all must be Document instances
-                elif isinstance(svalue, tuple):
-                    invalid = next([sv for sv in svalue
-                                    if not (isinstance(sv, type) and
-                                            issubclass(sv, SchemaDocument))],
-                                    None)
-                    if invalid is not None:
-                        raise self.StructureError(
-                            msg="A tuple defined field must have only model "
-                                "documents as options, '%s' is given." % invalid
-                        )
-                    for k, v in mapping.iteritems():
-                        if not isinstance(v, svalue): # within the tuple
-                            raise self.StructureError(k, svalue, v)
+                    for k, list_val in mapping.iteritems():
+                        if not all([isinstance(v, svalue[0]) for v in list_val]):
+                            raise self.StructureError(k, svalue, list_val)
                 # structure value is an ALLOWED_TYPE, CustomField or Document
                 elif svalue in ALLOWED_TYPES or \
                      (isinstance(svalue, type) and
@@ -377,7 +237,7 @@ class SchemaDocument(dict):
                 continue
             # STRUCTURE KEY (FIELD) IS A STRING
             # field not set or None anyway
-            if skey not in mapping or mapping.get(skey) is None:
+            if skey not in mapping or mapping[skey] is None:
                 continue
             # is it in allowed types?
             elif svalue in ALLOWED_TYPES and isinstance(mapping[skey], svalue):
@@ -385,7 +245,7 @@ class SchemaDocument(dict):
             # some custom type or document relation?
             elif isinstance(svalue, type) and \
                  issubclass(svalue, (CustomField, SchemaDocument)) and \
-                 isinstance(mapping.get(skey), svalue):
+                 isinstance(mapping[skey], svalue):
                 continue
             # structure value is a list [instance]
             elif isinstance(svalue, list):
@@ -401,12 +261,6 @@ class SchemaDocument(dict):
                      isinstance(mapping[skey], list) and \
                      all([isinstance(v, svalue[0]) for v in mapping[skey]]):
                     continue
-            # structure value is a tuple, all must be Document instances
-            elif isinstance(svalue, tuple):
-                if all([isinstance(sv, type) and
-                        issubclass(sv, SchemaDocument) for sv in svalue]) and \
-                   isinstance(mapping[skey], svalue): # within the tuple
-                    continue
             # it's a dictionary instance, check recursively
             elif isinstance(svalue, dict) and \
                  isinstance(mapping[skey], dict) and \
@@ -414,7 +268,7 @@ class SchemaDocument(dict):
                 if self._validate(svalue, mapping[skey]):
                     continue
             # houston, we got a problem!
-            raise self.StructureError(skey, svalue, mapping.get(skey))
+            raise self.StructureError(skey, svalue, mapping[skey])
         return True
 
     def validate(self):

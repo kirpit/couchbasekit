@@ -27,35 +27,13 @@ on-demand and caches them during the object's life time.
 >>> dna.save()
 4535519295771
 >>> dna = Author('douglas_adams') # retrieve the same doc
->>> dna.__getitem__('publisher', raw=True)
+>>> dna.get('publisher')
 u'publisher_lonely_galaxy'
 >>> dna.load() # fetch and cache all of its items
 ... # output stripped out to keep here clean
->>> dna.__getitem__('publisher', raw=True) # no more raw, already cached
+>>> dna.get('publisher') # no more raw, already cached
 {u'doc_type': u'publisher', u'created_at': u'2012-11-18 16:24:16.784474+00:00', 'slug': u'lonely_galaxy', u'name': u'Lonely Galaxy Press'}
 >>>
-
-Pragmatic Document Relations
-----------------------------
-Sometimes, you don't know which model will be related for your field. As a
-meaningless example, you want to assign pillows to your pets::
-
-    from example.samples.pets import Cat, Dog, Dragon
-
-    class Pillow(Document):
-        __bucket_name__ = 'couchbasekit_samples'
-        doc_type = 'pillow'
-        structure = {
-            'material': unicode,
-            'price': float,
-            'pet': (Cat, Dog, Dragon),
-        }
-
-As you can see, ``pet`` field of each Pillow document can be assigned to
-**either** of these animals and special tuple operator was used to define it.
-This tuple operator is only used to define such pragmatic document relations
-and its members can be only model documents or you will get a
-:exc:`couchbasekit.errors.StructureError`.
 
 Custom Fields
 -------------
@@ -103,11 +81,11 @@ you should specify it explicitly **only once**. Otherwise just let it be
 a subclass of :class:`couchbasekit.fields.CustomField` as usual.
 
 
-Nested Dictionary Fields
-------------------------
+Schemaless Fields
+-----------------
 Some of your model documents may need complicated structure, such as
 pre-defined item types of a dictionary, deeply nested dictionary or
-totally schema-less sub-structures.
+totally schemaless sub-structures.
 
 .. warning::
     One downside of such free dictionary models is that you can't use
@@ -115,7 +93,7 @@ totally schema-less sub-structures.
     dictionary-like item assignment and the same rule applies for retrieving
     of your data.
 
-First and easiest example would be a total schema-less model document::
+First and easiest example would be a total schemaless model document::
 
     class FreeModel(Document):
         __bucket_name__ = 'couchbasekit_samples'
@@ -129,12 +107,12 @@ First and easiest example would be a total schema-less model document::
     free['somefield'] = 'some value'
     # and those also will work as the Document class is a dictionary itself!
     free = FreeModel(somefield='some value', listfield=['list', 'of', 'items'])
-    # or:
+    # or that's ok too:
     data = {'somefield': 'some value', 'listfield': ['list', 'of', 'items']}
     free = FreeModel(data)
 
 
-If you want a semi schema-less structure on a specific field that means you
+If you want a semi schemaless structure on a specific field that means you
 know it will be dictionary and what type for its keys and values will be, you
 may define only types for its key-value pair::
 
@@ -186,18 +164,18 @@ Finally, deeply nested dictionary fields::
     category by dot notation:
 
     >>> book = Book('ad45556b3ba4')
-    >>> book.category is None
-    False
     >>> book.category.Cooking.Dessert # wrong!
-    >>> book.category['Cooking']['Dessert'] # correct
-    >>> book.category['Sci-Fiction'] # correct
-    >>> book.category['Cooking']['Fast Food'] # correct
-
-    Use dictionary-like item assignments if they're not defined yet:
-
-    >>> book = Book('ad45556b3ba4')
+    >>> book.category.Cooking[u'Dessert'] # wrong!
     >>> book.category is None
     True
-    >>> book.category['History'] = False # wrong!
-    >>> book['category'] = {u'History': False} # correct
+    >>> book.category['Cooking']['Dessert'] = False # wrong, as 'category' is not assigned yet
+    >>> book.category = {u'Cooking': {u'Dessert': True}} # correct
+    >>> book.category['Cooking']['Dessert'] = True # it was created, so it's ok now
+    >>> book['category']['Cooking']['Dessert'] = True # correct, same as above
+    >>> book.category['History'] # wrong, you'll get a KeyError
+    >>> 'History' in book.category # that's the way
+    False
+    >>> book.category[u'History'] = True # correct, only assigns the u'History'
+    >>> book['category'] = {u'History': True} # correct, but overwrites the 'category'
+    >>>
 

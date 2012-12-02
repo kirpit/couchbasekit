@@ -70,9 +70,7 @@ class Document(SchemaDocument):
         return super(Document, self).__getattribute__(item)
 
     def __setattr__(self, key, value):
-        # always use getattr to check!
-        # NOT hasattr cuz it returns True if defined in structure but not exist
-        if getattr(self, key) is None and key in getattr(self, 'structure'):
+        if key in self.structure:
             self[unicode(key)] = value
         else:
             super(Document, self).__setattr__(key, value)
@@ -129,72 +127,47 @@ class Document(SchemaDocument):
         # return is_fetched in other words:
         return not self.is_new_record
 
-    def _make_offset_aware(self, mapping=None):
-        # root
-        if mapping is None:
-            mapping = self
-        naive_types = (datetime.datetime, datetime.time)
-        for key, value in mapping.iteritems():
-            new_key, new_value = key, value
-            # timezone naive key
-            if isinstance(key, naive_types) and key.tzinfo is None:
-                new_key = key.replace(tzinfo=tzutc())
-                del mapping[key]
-            # timezone naive value
-            if isinstance(value, naive_types) and value.tzinfo is None:
-                new_value = value.replace(tzinfo=tzutc())
-            # list
-            elif isinstance(value, list) and len(value) and \
-                 any([isinstance(v, naive_types) for v in value]):
-                new_value = list()
-                for v in value:
-                    if isinstance(v, naive_types):
-                        v = v.replace(tzinfo=tzutc())
-                    new_value.append(v)
-            # recursive value
-            elif isinstance(value, dict):
-                new_value = self._make_offset_aware(value)
-            mapping[new_key] = new_value
-        return mapping
+    def _encode_item(self, value):
+        # Document instance
+        if isinstance(value, Document):
+            if value.doc_id is None:
+                raise self.StructureError(
+                    msg="Trying to relate an unsaved "
+                        "document; '%s'" % type(value).__name__
+                )
+            return value.doc_id
+        # CustomField instance
+        elif isinstance(value, CustomField):
+            return value.value
+        # datetime types
+        elif isinstance(value, (datetime.datetime, datetime.date, datetime.time)):
+            if hasattr(value, 'tzinfo') and value.tzinfo is None:
+                # always timezone "aware" datetime and time
+                value = value.replace(tzinfo=tzutc())
+            pickler = jsonpickle.Pickler(unpicklable=False)
+            return pickler.flatten(value)
+        # list
+        elif isinstance(value, list):
+            return [self._encode_item(v) for v in value]
+        # dictionary, pass it to dict encoder
+        elif isinstance(value, dict):
+            return self._encode_dict(value)
+        # no need to encode
+        return value
 
-    def _json_safe(self, mapping):
+    def _encode_dict(self, mapping):
         data = dict()
         for key, value in mapping.iteritems():
             # None values will be stripped out
             if value is None:
                 continue
-            # KEY
-            # Document instance
+            # Document instance key issue
             if isinstance(key, Document):
                 # document instances are not hashable!
                 # should raise an error here
                 pass
-            # CustomField instance
-            elif isinstance(key, CustomField):
-                key = key.value
-            elif isinstance(key, (datetime.datetime,
-                                  datetime.date,
-                                  datetime.time)):
-                pickler = jsonpickle.Pickler(unpicklable=False)
-                key = pickler.flatten(key)
-            # VALUE
-            # Document instance
-            if isinstance(value, Document):
-                if value.doc_id is None:
-                    raise self.StructureError(
-                        msg="Trying to relate an unsaved "
-                            "document; '%s'" % type(value).__name__
-                    )
-                value = value.doc_id
-            # CustomField instance
-            elif isinstance(value, CustomField):
-                value = value.value
-            # a dictionary value, go recursive
-            elif isinstance(value, dict):
-                value = self._json_safe(value)
-
-            # good to json encode
-            data[key] = value
+            key = self._encode_item(key)
+            data[key] = self._encode_item(value)
         return data
 
     def save(self, expiry=0):
@@ -215,10 +188,9 @@ class Document(SchemaDocument):
         # validate
         self[u'doc_type'] = unicode(self.doc_type)
         self.validate()
-        # always timezone "aware" datetimes and times
-        self._make_offset_aware()
         # json safe data
-        json_data = jsonpickle.encode(self._json_safe(self), unpicklable=False)
+        json_safe = self._encode_dict(self)
+        json_data = jsonpickle.encode(json_safe, unpicklable=False)
         # still no key identifier? create one..
         if self.doc_id is None:
             self._hashed_key = hashlib.sha1(json_data).hexdigest()[0:12]

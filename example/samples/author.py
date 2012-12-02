@@ -1,9 +1,11 @@
 #! /usr/bin/env python
 import datetime
-from couchbasekit import Document
+from couchbasekit import Document, Connection
 from couchbasekit.fields import EmailField, ChoiceField
 from example.samples.publisher import Publisher
 from example.samples.book import Book
+
+Connection.auth('couchbasekit_samples', 'couchbasekit')
 
 class Gender(ChoiceField):
     CHOICES = {
