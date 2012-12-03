@@ -75,11 +75,18 @@ You can also define a :func:`list` of values. For example::
         }
 
 Note that if you are sure what type of elements a `List Field` will have,
-you should specify it explicitly **only once**. Otherwise just let it be
-``list`` then it can have any combination of
-:const:`couchbasekit.schema.ALLOWED_TYPES`, a model document or
-a subclass of :class:`couchbasekit.fields.CustomField` as usual.
+you should explicitly specify it as an instance with a **single value** in it
+(i.e. ``'tags': [unicode]``). Otherwise just let it be ``list`` then it can
+have any combination of values in it.
 
+However, be careful if you define your field as a plain ``list`` (such as
+``'pictures': list``). You will always get a list of basic types (e.g.
+``unicode``, ``int``, ``float``, ``bool`` etc..) as `couchbasekit` doesn't
+know if they're any of the advanced ones (e.g. custom fields, document
+relations, datetime.date, etc..). For example, if you save a document
+relation in them, you will get its :meth:`couchbasekit.document.Document.doc_id`
+as ``unicode`` but not the document itself, which actually would be useful
+for performance tuning.
 
 Schemaless Fields
 -----------------
