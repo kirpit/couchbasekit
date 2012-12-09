@@ -33,6 +33,9 @@ class CustomField(object):
     def __init__(self):
         raise NotImplementedError()
 
+    def __unicode__(self):
+        return unicode(self.value)
+
     def __repr__(self):
         return repr(self.value)
 

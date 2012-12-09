@@ -138,7 +138,7 @@ class Document(SchemaDocument):
             return value.doc_id
         # CustomField instance
         elif isinstance(value, CustomField):
-            return value.value
+            return unicode(value)
         # datetime types
         elif isinstance(value, (datetime.datetime, datetime.date, datetime.time)):
             if hasattr(value, 'tzinfo') and value.tzinfo is None:

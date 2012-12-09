@@ -237,7 +237,7 @@ class SchemaDocument(dict):
                 continue
             # STRUCTURE KEY (FIELD) IS A STRING
             # field not set or None anyway
-            if skey not in mapping or mapping[skey] is None:
+            if skey not in mapping or mapping.get(skey) is None:
                 continue
             # is it in allowed types?
             elif svalue in ALLOWED_TYPES and isinstance(mapping[skey], svalue):
