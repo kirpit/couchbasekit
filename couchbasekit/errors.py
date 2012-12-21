@@ -34,10 +34,10 @@ class DoesNotExist(CouchbasekitException):
             # some useful code here
             pass
     """
-    def __init__(self, obj, key):
+    def __init__(self, doc):
         msg = "{doc} document with the key '{key}' not found.".format(
-            doc=type(obj).__name__,
-            key=key,
+            doc=type(doc).__name__,
+            key=doc.doc_id,
         )
         super(DoesNotExist, self).__init__(msg)
 

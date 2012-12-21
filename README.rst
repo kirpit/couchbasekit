@@ -50,7 +50,7 @@ Then define your model document.
             'gender': Gender,
             'email': EmailField,
             'publisher': Publisher, # kind of foreign key
-            'books': [Book], # 1-to-many, or many-to-many? some-to-some.. :)
+            'books': [Book], # 1-to-many
             'has_book': bool,
             'age': int,
             'birthday': datetime.date,
@@ -83,7 +83,7 @@ True
 ... except Author.StructureError as why:
 ...     print why
 ...
-Key field "slug" is defined but not provided.
+Key field 'slug' is defined but not provided.
 >>>
 >>> douglas.slug = u'douglas_adams'
 >>> try:
@@ -91,13 +91,14 @@ Key field "slug" is defined but not provided.
 ... except Author.StructureError as why:
 ...     print why
 ...
-Required field for "first_name" is missing.
+Required field for 'first_name' is missing.
 >>>
 >>> isinstance(douglas, dict)
 True
 >>> douglas.update({
 ...     'first_name': u'Douglas',
 ...     'last_name': u'Adams',
+...     'gender': Gender('M'),
 ...     'email': EmailField('dna@example.com'),
 ... })
 ...

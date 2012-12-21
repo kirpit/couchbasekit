@@ -51,7 +51,7 @@ class Document(SchemaDocument):
                 self._hashed_key = key_or_map
             # the document must be found if a key is given
             if self._fetch_data(get_lock) is False:
-                raise self.DoesNotExist(self, self.doc_id)
+                raise self.DoesNotExist(self)
 
     def __eq__(self, other):
         if type(self) is type(other) and \
@@ -108,6 +108,30 @@ class Document(SchemaDocument):
         if self._bucket is None:
             self._bucket = Connection.bucket(self.__bucket_name__)
         return self._bucket
+
+    def view(self, view=None):
+        """Returns the couchbase view(s) if :attr:`__view_name__` was provided
+            within model class.
+
+        :param view: If provided returns the asked couchbase view object or
+            :attr:`__view_name__` design document.
+        :type view: str
+        :returns: couchbase design document, couchbase view or None
+        :rtype: :class:`couchbase.client.DesignDoc` or
+            :class:`couchbase.client.View` or None
+        """
+        if self.__view_name__ is None:
+            return None
+        # cache the design document
+        if self._view_design_doc is None:
+            self._view_design_doc = self.bucket['_design/%s' % self.__view_name__]
+        # return the design doc
+        if view is None:
+            return self._view_design_doc
+        # cache the views
+        if self._view_cache is None:
+            self._view_cache = self._view_design_doc.views()
+        return next(iter([v for v in self._view_cache if v.name==view]), None)
 
     def _fetch_data(self, get_lock=False):
         try:
@@ -198,26 +222,14 @@ class Document(SchemaDocument):
         self.cas_value = self.bucket.set(self.doc_id, expiry, 0, json_data)[1]
         return self.cas_value
 
-    def view(self, view=None):
-        """Returns the couchbase view(s) if :attr:`__view_name__` was provided
-            within model class.
+    def delete(self):
+        """Deletes the current document with CAS value if it was saved.
 
-        :param view: If provided returns the asked couchbase view object or
-            :attr:`__view_name__` design document.
-        :type view: str
-        :returns: couchbase design document, couchbase view or None
-        :rtype: :class:`couchbase.client.DesignDoc` or
-            :class:`couchbase.client.View` or None
+        :returns: Response from CouchbaseClient.
+        :rtype: unicode
+        :raises: :exc:`couchbasekit.errors.DoesNotExist` or
+            :exc:`couchbase.exception.MemcachedError`
         """
-        if self.__view_name__ is None:
-            return None
-        # cache the design document
-        if self._view_design_doc is None:
-            self._view_design_doc = self.bucket['_design/%s' % self.__view_name__]
-        # return the design doc
-        if view is None:
-            return self._view_design_doc
-        # cache the views
-        if self._view_cache is None:
-            self._view_cache = self._view_design_doc.views()
-        return next(iter([v for v in self._view_cache if v.name==view]), None)
+        if not self.cas_value or not self.doc_id:
+            raise self.DoesNotExist(self)
+        return self.bucket.delete(self.doc_id, self.cas_value)

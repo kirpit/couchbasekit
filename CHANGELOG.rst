@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Release v0.2.0-dev
+--------------
+* EmailField.is_valid(email) is implemented and does work
+* doc.delete() method for convenience that is equal to doc.bucket.delete(doc.doc_id, doc.cas_value)
+* Fixed dependency errors on installation
+
 Release v0.1.2
 --------------
 * Include *.rst files to prevent setup fail

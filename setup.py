@@ -1,11 +1,10 @@
 #! /usr/bin/env python
 from distutils.core import setup
-from couchbasekit import __version__
 
 
 setup(
     name = 'couchbasekit',
-    version = __version__,
+    version = '0.2.0-dev',
     author = 'Roy Enjoy',
     author_email = 'kirpit@gmail.com',
     packages = ['couchbasekit'],

@@ -2,4 +2,4 @@ AUTHOR:
 Roy Enjoy <kirpit *at* gmail.com>
 
 CONTRIBUTORS:
-Some name here?
+* add your name here...
