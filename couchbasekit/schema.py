@@ -28,6 +28,7 @@ ALLOWED_TYPES = (
     datetime.time,
 )
 
+
 class SchemaDocument(dict):
     """Schema document class that handles validations and restoring raw
     couchbase documents into Python values as defined in model documents.
@@ -43,7 +44,6 @@ class SchemaDocument(dict):
     """
     __metaclass__ = ABCMeta
     StructureError = StructureError
-    __bucket_name__ = None
     __key_field__ = None
     doc_type = None
     structure = dict()
@@ -141,7 +141,7 @@ class SchemaDocument(dict):
         # make sure the accessed value respects our structure
         try:
             new_value = self._decode_item(self.structure[item], value)
-        except ValueError as why:
+        except ValueError:
             raise ValueError(
                 "Incorrect value for the field %s, '%s' was given." % (item, value)
             )

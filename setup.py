@@ -10,7 +10,7 @@ setup(
     packages = ['couchbasekit'],
     url = 'https://github.com/kirpit/couchbasekit',
     license = 'LICENSE.txt',
-    description = 'A wrapper around couchbase driver for document validation and more.',
+    description = 'A wrapper around CouchBase Python driver for document validation and more.',
     long_description = open('README.rst').read(),
     install_requires = [
         'couchbase>=0.8.1',

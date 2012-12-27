@@ -34,14 +34,11 @@ class CustomField(object):
     def __init__(self):
         raise NotImplementedError()
 
-    def __unicode__(self):
-        return unicode(self.value)
-
     def __repr__(self):
         return repr(self.value)
 
     def __eq__(self, other):
-        if type(self) is type(other) and self.value==other.value:
+        if type(other) is CustomField and other.value==self.value:
             return True
         return False
 
@@ -52,9 +49,9 @@ class CustomField(object):
 
         :returns: The value to be saved for the field within
             :class:`couchbasekit.document.Document` instances.
-        :rtype: unicode
+        :rtype: mixed
         """
-        if not isinstance(self._value, basestring):
+        if self._value is None:
             raise ValueError("%s's 'value' is not set." % type(self).__name__)
         return self._value
 
@@ -92,8 +89,7 @@ class ChoiceField(CustomField):
     __metaclass__ = ABCMeta
     CHOICES = {}
     def __eq__(self, other):
-        if super(ChoiceField, self).__eq__(other) and \
-           self.CHOICES==other.CHOICES:
+        if super(ChoiceField, self).__eq__(other) and other.CHOICES==self.CHOICES:
             return True
         return False
 
@@ -131,10 +127,6 @@ class EmailField(CustomField):
     """The custom field to be used for email addresses and intended to validate
     them as well.
 
-    .. warning::
-        Email address validation is NOT implemented yet. A best practice
-        validation that doesn't depend on any other package is much appreciated.
-
     :param email: Email address to be saved.
     :type email: basestring
     """
@@ -149,10 +141,12 @@ class EmailField(CustomField):
 
         :param email: Email address to be saved.
         :type email: basestring
-        :returns: Always True, as it's not implemented yet.
+        :returns: True if email address is correct, False otherwise.
         :rtype: bool
         """
-        return True if EMAIL_RE.match(email) else False
+        if isinstance(email, basestring) and EMAIL_RE.match(email):
+            return True
+        return False
 
 
 class PasswordField(CustomField):

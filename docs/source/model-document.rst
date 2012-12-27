@@ -12,7 +12,6 @@ your model:
 and the optional ones are:
 
 * __key_field__
-* __view_name__
 * default_values
 * required_fields
 
@@ -71,12 +70,6 @@ If you don't provide a ``__key_field__`` in your structure, first 12
 characters of the hash key of your initial document will be used without
 prefixing with ``doc_type`` attribute. Hashing is done via :mod:`hashlib.sha1`.
 
-__view_name__ (optional)
---------------------------
-This attribute is used by :meth:`couchbasekit.document.Document.view` and
-:class:`couchbasekit.viewsync.ViewSync` helper. Refer to their documentation
-for advanced use.
-
 default_values (optional)
 --------------------------
 As it explains itself, it sets the default values for specified fields before
@@ -96,3 +89,35 @@ too) and have all the names of the fields that are required.
 
 Refer to :ref:`quick-start` for an example.
 
+Bonus: @register_view decorator
+-------------------------------
+You may use this decorator to declare which design view your document
+instances will be using. This feature is used by
+:meth:`couchbasekit.document.Document.view` that lets you to query your
+views::
+
+    from couchbasekit import Document, register_view
+
+    @register_view('dev_books')
+    class Book(Document):
+        __bucket_name__ = 'mybucket'
+        doc_type = 'book'
+        structure = {
+            # snip snip
+        }
+
+Then it becomes easier to get your view queries. Please refer to CouchBase
+views documentation for advanced query options::
+
+    >>> by_title = Book().view('by_title').results({
+            'startkey': 'A',
+            'endkey': 'C',
+            'stale': 'ok',
+            'limit': 1000,
+        })
+    >>> for result in by_title.results:
+    ...     print result['id'], result['key'], result['value']
+
+
+An experimental tool :class:`couchbasekit.viewsync.ViewSync`
+also uses this decorator to backup/restore your server-side map/reduce functions.

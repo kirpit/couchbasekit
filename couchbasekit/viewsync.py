@@ -11,6 +11,30 @@ import os
 import shutil
 from couchbasekit import Document
 
+
+def register_view(design_doc):
+    """Model document decorator to register its design document view::
+
+        @register_view('dev_books')
+        class Book(Document):
+            __bucket_name__ = 'mybucket'
+            doc_type = 'book'
+            structure = {
+                # snip snip
+            }
+
+    :param design_doc: The name of the design document.
+    :type design_doc: basestring
+    """
+    def _injector(doc):
+        if not issubclass(doc, Document):
+            raise TypeError("Class must be a couchbasekit 'Document' subclass.")
+        doc.__view_name__ = design_doc
+        ViewSync._documents.add(doc)
+        return doc
+    return _injector
+
+
 class ViewSync(object):
     """This is an experimental helper to download, upload and synchronize your
     couchbase views (both map and reduce JavaScript functions) in an organized
@@ -33,34 +57,15 @@ class ViewSync(object):
     _documents = set()
 
     @classmethod
-    def register_document(cls, document):
-        """Registers a model document within the synchronizer::
-
-            from example.samples.book import Book
-            ViewSync.register_document(Book)
-
-        Finally, you should also set your
-        :class:`couchbasekit.document.Document`'s ``__view_name__`` attribute
-        to the design document name of your view, i.e. ``'dev_books'``
-
-        :param document: The model document class to be registered.
-        :type document: :class:`couchbasekit.document.Document`
-        """
-        if not issubclass(document, Document):
-            raise TypeError('Class must be a couchbasekit "Document" subclass.')
-        cls._documents.add(document)
-
-    @classmethod
     def download(cls):
         """Downloads all the views from server for the registered model
         documents into the defined :attr:`VIEW_PATHS` directory.
         """
         if not isinstance(cls.VIEWS_PATH, basestring):
-            raise RuntimeError('ViewSync.VIEWS_PATH must be set')
+            raise RuntimeError("ViewSync.VIEWS_PATH must be set")
         if not os.path.isdir(cls.VIEWS_PATH):
             raise RuntimeError(
-                'Directory must created before downloading; "%s"'
-                % cls.VIEWS_PATH
+                "Directory must created before downloading; '%s'" % cls.VIEWS_PATH
             )
         os.chdir(cls.VIEWS_PATH)
         # remove everything first
@@ -78,13 +83,15 @@ class ViewSync(object):
                 os.mkdir(save_dir)
                 for name, view in views.iteritems():
                     if 'map' in view:
-                        map_file = '%s/%s-map.js' % (save_dir, name)
+                        map_file = '%s/%s.map.js' % (save_dir, name)
                         with open(map_file, 'w') as mapf:
                             mapf.write(view['map'])
+                        print 'Downloaded: %s' % map_file
                     if 'reduce' in view:
-                        reduce_file = '%s/%s-reduce.js' % (save_dir, name)
+                        reduce_file = '%s/%s.reduce.js' % (save_dir, name)
                         with open(reduce_file, 'w') as reducef:
                             reducef.write(view['reduce'])
+                        print 'Downloaded: %s' % reduce_file
         pass
 
     @classmethod

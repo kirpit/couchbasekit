@@ -18,8 +18,10 @@ You can define a field type as another model document (or even recursively)
 within your structure. This simulates kind of foreign key scenario in the
 relational systems but you must know that every related document will be
 fetched separately from couchbase server as the nature of the non-relational
-systems. The good news is, couchbasekit fetches these related documents
-on-demand and caches them during the object's life time.
+systems.
+
+The good news is, these relations are lazy-loaded, fetched on-demand and
+`couchbasekit` caches them during the object's life time.
 
 >>> lonely_galaxy = Publisher('lonely_galaxy')
 >>> dna = Author('douglas_adams')
@@ -29,8 +31,8 @@ on-demand and caches them during the object's life time.
 >>> dna = Author('douglas_adams') # retrieve the same doc
 >>> dna.get('publisher')
 u'publisher_lonely_galaxy'
->>> dna.load() # fetch and cache all of its items
-... # output stripped out to keep here clean
+>>> dna.publisher # or dna.load()
+{u'doc_type': u'publisher', u'created_at': u'2012-11-18 16:24:16.784474+00:00', 'slug': u'lonely_galaxy', u'name': u'Lonely Galaxy Press'}
 >>> dna.get('publisher') # no more raw, already cached
 {u'doc_type': u'publisher', u'created_at': u'2012-11-18 16:24:16.784474+00:00', 'slug': u'lonely_galaxy', u'name': u'Lonely Galaxy Press'}
 >>>

@@ -17,6 +17,7 @@ from couchbasekit.schema import SchemaDocument
 from couchbasekit.errors import DoesNotExist
 from couchbasekit.fields import CustomField
 
+
 class Document(SchemaDocument):
     """Couchbase document to be inherited by user-defined model documents that
     handles everything from validation to comparison with the help of
@@ -33,6 +34,7 @@ class Document(SchemaDocument):
         :exc:`couchbasekit.errors.DoesNotExist`
     """
     DoesNotExist = DoesNotExist
+    __bucket_name__ = None
     __view_name__ = None
     _bucket = None
     _hashed_key = None
@@ -54,10 +56,10 @@ class Document(SchemaDocument):
                 raise self.DoesNotExist(self)
 
     def __eq__(self, other):
-        if type(self) is type(other) and \
-           self.cas_value==other.cas_value and \
-           self.keys()==other.keys() and \
-           all([self[k]==other[k] for k in self.keys()]):
+        if type(other) is Document and \
+           other.cas_value==self.cas_value and \
+           other.keys()==self.keys() and \
+           all([other[k]==self[k] for k in self.keys()]):
             return True
         return False
 
@@ -136,9 +138,9 @@ class Document(SchemaDocument):
     def _fetch_data(self, get_lock=False):
         try:
             if get_lock is True:
-                (status, self.cas_value, data) = self.bucket.getl(self.doc_id)
+                status, self.cas_value, data = self.bucket.getl(self.doc_id)
             else:
-                (status, self.cas_value, data) = self.bucket.get(self.doc_id)
+                status, self.cas_value, data = self.bucket.get(self.doc_id)
         except MemcachedError as why:
             # raise if other than "not found"
             if why.status!=1:
@@ -162,7 +164,7 @@ class Document(SchemaDocument):
             return value.doc_id
         # CustomField instance
         elif isinstance(value, CustomField):
-            return unicode(value)
+            return value.value
         # datetime types
         elif isinstance(value, (datetime.datetime, datetime.date, datetime.time)):
             if hasattr(value, 'tzinfo') and value.tzinfo is None:
@@ -215,7 +217,7 @@ class Document(SchemaDocument):
         # json safe data
         json_safe = self._encode_dict(self)
         json_data = jsonpickle.encode(json_safe, unpicklable=False)
-        # still no key identifier? create one..
+        # still no document id? create one..
         if self.doc_id is None:
             self._hashed_key = hashlib.sha1(json_data).hexdigest()[0:12]
         # finally
@@ -223,7 +225,7 @@ class Document(SchemaDocument):
         return self.cas_value
 
     def delete(self):
-        """Deletes the current document with CAS value if it was saved.
+        """Deletes the current document explicitly with CAS value.
 
         :returns: Response from CouchbaseClient.
         :rtype: unicode

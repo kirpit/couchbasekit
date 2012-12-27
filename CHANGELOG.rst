@@ -3,8 +3,10 @@ Changelog
 
 Release v0.2.0-dev
 --------------
+* @register_view decorator to use CouchBase views easier
 * EmailField.is_valid(email) is implemented and does work
-* doc.delete() method for convenience that is equal to doc.bucket.delete(doc.doc_id, doc.cas_value)
+* CustomField abstract class can hold any type of value including dictionary
+* doc.delete() method that is equal to doc.bucket.delete(doc.doc_id, doc.cas_value)
 * Fixed dependency errors on installation
 
 Release v0.1.2
