@@ -38,7 +38,7 @@ class CustomField(object):
         return repr(self.value)
 
     def __eq__(self, other):
-        if type(other) is CustomField and other.value==self.value:
+        if type(other) is type(self) and other.value==self.value:
             return True
         return False
 

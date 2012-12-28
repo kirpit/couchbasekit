@@ -56,7 +56,7 @@ class Document(SchemaDocument):
                 raise self.DoesNotExist(self)
 
     def __eq__(self, other):
-        if type(other) is Document and \
+        if type(other) is type(self) and \
            other.cas_value==self.cas_value and \
            other.keys()==self.keys() and \
            all([other[k]==self[k] for k in self.keys()]):

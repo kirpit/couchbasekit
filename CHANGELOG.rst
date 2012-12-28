@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Release v0.2.1
+--------------
+* Urgent CustomField and Document __eq__ fix (sorry for that)
+
 Release v0.2.0
 --------------
 * @register_view decorator (instead of __view_name__ document model property)
