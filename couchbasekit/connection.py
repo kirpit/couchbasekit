@@ -8,7 +8,6 @@ couchbasekit.connection
 :license: MIT, see LICENSE.txt for details.
 """
 from couchbase import Couchbase
-from couchbasekit.errors import CredentialsNotSetError
 
 
 class Connection(object):
@@ -62,6 +61,7 @@ class Connection(object):
         cls.username = username
         cls.password = password
         cls.server = ':'.join((server, port))
+        cls.close()
 
     @classmethod
     def bucket(cls, bucket):
@@ -76,7 +76,7 @@ class Connection(object):
         """
         if cls.connection is None:
             if cls.username is None or cls.password is None:
-                raise CredentialsNotSetError()
+                raise RuntimeError("CouchBase credentials are not set to connect.")
             cls.connection = Couchbase(cls.server, cls.username, cls.password)
         return cls.connection.bucket(bucket)
 

@@ -1,12 +1,16 @@
 Changelog
 =========
 
-Release v0.2.0-dev
+Release v0.2.0
 --------------
-* @register_view decorator to use CouchBase views easier
+* @register_view decorator (instead of __view_name__ document model property)
+    to use CouchBase views easier
 * EmailField.is_valid(email) is implemented and does work
+* ViewSync.download() now downloads within their bucket folder and supports spatial views too
+* ViewSync.upload() is implemented and does work
 * CustomField abstract class can hold any type of value including dictionary
 * doc.delete() method that is equal to doc.bucket.delete(doc.doc_id, doc.cas_value)
+* Removed CredentialsNotSetError and using RuntimeError instead on connection
 * Fixed dependency errors on installation
 
 Release v0.1.2

@@ -13,13 +13,6 @@ class CouchbasekitException(Exception):
     pass
 
 
-class CredentialsNotSetError(CouchbasekitException):
-    """Raised when your :class:`couchbasekit.connections.Connection`
-    credentials are not set.
-    """
-    pass
-
-
 class DoesNotExist(CouchbasekitException):
     """Raised when a model class passed with an id to be fetched, but not
     found within couchbase.
