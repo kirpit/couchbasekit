@@ -38,6 +38,7 @@ class Connection(object):
     password = None
     server = None
     connection = None
+    _buckets = {}
 
     def __new__(cls, *args, **kwargs):
         raise RuntimeWarning('Connection class is not intended to create instances.')
@@ -64,11 +65,11 @@ class Connection(object):
         cls.close()
 
     @classmethod
-    def bucket(cls, bucket):
-        """Gives the bucket from couchbase server.
+    def bucket(cls, bucket_name):
+        """Gives the bucket_name from couchbase server.
 
-        :param bucket: Bucket name to fetch.
-        :type bucket: str
+        :param bucket_name: Bucket name to fetch.
+        :type bucket_name: str
         :returns: couchbase driver's Bucket object.
         :rtype: :class:`couchbase.client.Bucket`
         :raises: :exc:`couchbasekit.errors.CredentialsNotSetError` If the
@@ -78,7 +79,12 @@ class Connection(object):
             if cls.username is None or cls.password is None:
                 raise RuntimeError("CouchBase credentials are not set to connect.")
             cls.connection = Couchbase(cls.server, cls.username, cls.password)
-        return cls.connection.bucket(bucket)
+        # already cached?
+        if bucket_name in cls._buckets:
+            return cls._buckets[bucket_name]
+        # fetch and cache
+        cls._buckets[bucket_name] = cls.connection.bucket(bucket_name)
+        return cls._buckets[bucket_name]
 
     @classmethod
     def close(cls):

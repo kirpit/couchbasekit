@@ -27,7 +27,7 @@ Then define your model document.
 **author.py**::
 
     import datetime
-    from couchbasekit import Document
+    from couchbasekit import Document, register_view
     from couchbasekit.fields import EmailField, ChoiceField
     from example.samples.publisher import Publisher
     from example.samples.book import Book
@@ -39,6 +39,7 @@ Then define your model document.
         }
 
 
+    @register_view('dev_authors')
     class Author(Document):
         __bucket_name__ = 'couchbasekit_samples'
         __key_field__ = 'slug' # optional
@@ -72,7 +73,7 @@ Then define your model document.
 
 Then use it as such;
 
->>> from example.samples.author import Author
+>>> from example.samples.author import Author, Gender
 >>> from couchbasekit.fields import EmailField
 >>>
 >>> douglas = Author()
@@ -130,4 +131,12 @@ True
 >>> douglas==dna
 False
 >>> # nice!
-
+>>> # because we set @register_view decorator, here are CouchBase views:
+>>> douglas.view()
+<couchbase.client.DesignDoc at 0x10d3ebe10>
+>>> view = douglas.view('by_fullname')
+>>> view
+<couchbase.client.View at 0x10ce57410>
+>>> view.results({'key': 'Douglas Adams'})
+<couchbase.client.ViewResultsIterator at 0x10d40dad0>
+>>> # please refer to CouchBase views documentation for further usage..

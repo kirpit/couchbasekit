@@ -36,7 +36,6 @@ class Document(SchemaDocument):
     DoesNotExist = DoesNotExist
     __bucket_name__ = None
     __view_name__ = None
-    _bucket = None
     _hashed_key = None
     _view_design_doc = None
     _view_cache = None
@@ -107,9 +106,7 @@ class Document(SchemaDocument):
         :returns: See: :class:`couchbase.client.Bucket`.
         :rtype: :class:`couchbase.client.Bucket`
         """
-        if self._bucket is None:
-            self._bucket = Connection.bucket(self.__bucket_name__)
-        return self._bucket
+        return Connection.bucket(self.__bucket_name__)
 
     def view(self, view=None):
         """Returns the couchbase view(s) if :attr:`__view_name__` was provided

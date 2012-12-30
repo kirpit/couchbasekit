@@ -63,9 +63,9 @@ class ViewSync(object):
     def _check_folder(cls):
         if not isinstance(cls.VIEWS_PATH, basestring):
             raise RuntimeError("ViewSync.VIEWS_PATH must be set")
-        if not os.path.isdir(cls.VIEWS_PATH):
+        if not os.path.exists(cls.VIEWS_PATH) or not os.path.isdir(cls.VIEWS_PATH):
             raise RuntimeError(
-                "Directory must created before downloading; '%s'" % cls.VIEWS_PATH
+                "Directory must created first; '%s'" % cls.VIEWS_PATH
             )
 
     @classmethod
@@ -93,18 +93,18 @@ class ViewSync(object):
                 for name, view in views.iteritems():
                     if isinstance(view, unicode) and view_type=='spatial':
                         spatial_file = '%s/%s.spatial.js' % (save_dir, name)
-                        with open(spatial_file, 'w') as spatialf:
-                            spatialf.write(view)
+                        with open(spatial_file, 'w') as f:
+                            f.write(view)
                         print 'Downloaded: %s' % spatial_file
                     if isinstance(view, dict) and 'map' in view:
                         map_file = '%s/%s.map.js' % (save_dir, name)
-                        with open(map_file, 'w') as mapf:
-                            mapf.write(view['map'])
+                        with open(map_file, 'w') as f:
+                            f.write(view['map'])
                         print 'Downloaded: %s' % map_file
                     if isinstance(view, dict) and 'reduce' in view:
                         reduce_file = '%s/%s.reduce.js' % (save_dir, name)
-                        with open(reduce_file, 'w') as reducef:
-                            reducef.write(view['reduce'])
+                        with open(reduce_file, 'w') as f:
+                            f.write(view['reduce'])
                         print 'Downloaded: %s' % reduce_file
         pass
 
@@ -155,8 +155,8 @@ class ViewSync(object):
                         view_name, view_type, js = filename.rsplit('.', 2)
                         if view_name not in new_ddoc['views']:
                             new_ddoc['views'][view_name] = {}
-                        with open('%s/%s' % (views_path, filename), 'r') as file:
-                            new_ddoc['views'][view_name][view_type] = file.read()
+                        with open('%s/%s' % (views_path, filename), 'r') as f:
+                            new_ddoc['views'][view_name][view_type] = f.read()
                 # spatial views
                 if os.path.exists(spatial_path) and os.path.isdir(spatial_path):
                     for filename in os.listdir(spatial_path):
@@ -164,9 +164,8 @@ class ViewSync(object):
                            not filename.endswith('.spatial.js'):
                             continue
                         view_name = filename.rsplit('.', 2)[0]
-                        with open('%s/%s' % (spatial_path, filename), 'r') as file:
-                            new_ddoc['spatial'][view_name] = file.read()
-                            pass
+                        with open('%s/%s' % (spatial_path, filename), 'r') as f:
+                            new_ddoc['spatial'][view_name] = f.read()
                 bucket['_design/%s' % ddoc_name] = new_ddoc
                 print 'Uploaded design document: %s' % ddoc_name
         pass
