@@ -79,11 +79,9 @@ class Connection(object):
             if cls.username is None or cls.password is None:
                 raise RuntimeError("CouchBase credentials are not set to connect.")
             cls.connection = Couchbase(cls.server, cls.username, cls.password)
-        # already cached?
-        if bucket_name in cls._buckets:
-            return cls._buckets[bucket_name]
-        # fetch and cache
-        cls._buckets[bucket_name] = cls.connection.bucket(bucket_name)
+        # cache cache $cash$
+        if bucket_name not in cls._buckets:
+            cls._buckets[bucket_name] = cls.connection.bucket(bucket_name)
         return cls._buckets[bucket_name]
 
     @classmethod

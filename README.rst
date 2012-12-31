@@ -130,8 +130,7 @@ True
 >>> douglas.has_book = True
 >>> douglas==dna
 False
->>> # nice!
->>> # because we set @register_view decorator, here are CouchBase views:
+>>> # because we set @register_view decorator, here are the CouchBase views:
 >>> douglas.view()
 <couchbase.client.DesignDoc at 0x10d3ebe10>
 >>> view = douglas.view('by_fullname')
@@ -140,3 +139,9 @@ False
 >>> view.results({'key': 'Douglas Adams'})
 <couchbase.client.ViewResultsIterator at 0x10d40dad0>
 >>> # please refer to CouchBase views documentation for further usage..
+>>> # and the bucket itself for advanced folks:
+>>> douglas.bucket
+<couchbase.client.Bucket at 0x10fb0c2d0>
+>>> print [m for m in dir(douglas.bucket) if not m.startswith('_')]
+['add', 'append', 'cas', 'decr', 'delete', 'design_docs', 'flush', 'gat', 'get', 'getl', 'incr', 'info', 'mc_client', 'name', 'password', 'prepend', 'replace', 'save', 'server', 'set', 'stats', 'touch', 'view']
+>>> # nice!

@@ -19,3 +19,4 @@ setup(
         #'py-bcrypt', # optional for couchbasekit.fields.PasswordField
     ],
 )
+
