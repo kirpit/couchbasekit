@@ -113,11 +113,12 @@ class Document(SchemaDocument):
         return Connection.bucket(self.__bucket_name__)
 
     def view(self, view_name=None):
-        """Returns the couchbase view(s) if :attr:`__view_name__` was provided
-            within model class.
+        """Returns a couchbase view (or design document view with no view_name
+        provided) if :func:`couchbasekit.viewsync.register_view` decorator was
+        applied to model class.
 
-        :param view_name: If provided returns the asked couchbase view object or
-            :attr:`__view_name__` design document.
+        :param view_name: If provided returns the asked couchbase view object
+            or design document otherwise.
         :type view_name: str
         :returns: couchbase design document, couchbase view or None
         :rtype: :class:`couchbase.client.DesignDoc` or
