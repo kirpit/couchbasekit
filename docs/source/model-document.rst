@@ -121,3 +121,9 @@ views documentation for advanced query options::
 
 An experimental tool :class:`couchbasekit.viewsync.ViewSync`
 also uses this decorator to backup/restore your server-side map/reduce functions.
+
+``@register_view`` decorator automatically attaches ``'full_set': True``
+parameter to your development views by default, so you don't have do it
+programmatically. To disable it simply use as:
+``@register_view('dev_books', full_set=False)``. This feature doesn't affect
+production views at all.

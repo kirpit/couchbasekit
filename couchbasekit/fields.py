@@ -4,7 +4,7 @@ couchbasekit.fields
 ~~~~~~~~~~~~~~~~~~~
 
 :website: http://github.com/kirpit/couchbasekit
-:copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
+:copyright: Copyright 2013, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
 :license: MIT, see LICENSE.txt for details.
 
 * :class:`couchbasekit.fields.CustomField`
@@ -41,6 +41,9 @@ class CustomField(object):
         if type(other) is type(self) and other.value==self.value:
             return True
         return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     @property
     def value(self):

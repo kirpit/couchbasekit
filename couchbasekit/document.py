@@ -4,7 +4,7 @@ couchbasekit.document
 ~~~~~~~~~~~~~~~~~~~~~
 
 :website: http://github.com/kirpit/couchbasekit
-:copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
+:copyright: Copyright 2013, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
 :license: MIT, see LICENSE.txt for details.
 """
 import datetime
@@ -39,6 +39,7 @@ class Document(SchemaDocument):
     _hashed_key = None
     _view_design_doc = None
     _view_cache = None
+    full_set = False
     cas_value = None
 
     def __init__(self, key_or_map=None, get_lock=False, **kwargs):
@@ -61,6 +62,9 @@ class Document(SchemaDocument):
            all([other[k]==self[k] for k in self.keys()]):
             return True
         return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __getattr__(self, item):
         if item in self:
@@ -108,13 +112,13 @@ class Document(SchemaDocument):
         """
         return Connection.bucket(self.__bucket_name__)
 
-    def view(self, view=None):
+    def view(self, view_name=None):
         """Returns the couchbase view(s) if :attr:`__view_name__` was provided
             within model class.
 
-        :param view: If provided returns the asked couchbase view object or
+        :param view_name: If provided returns the asked couchbase view object or
             :attr:`__view_name__` design document.
-        :type view: str
+        :type view_name: str
         :returns: couchbase design document, couchbase view or None
         :rtype: :class:`couchbase.client.DesignDoc` or
             :class:`couchbase.client.View` or None
@@ -125,12 +129,27 @@ class Document(SchemaDocument):
         if self._view_design_doc is None:
             self._view_design_doc = self.bucket['_design/%s' % self.__view_name__]
         # return the design doc
-        if view is None:
+        if view_name is None:
             return self._view_design_doc
         # cache the views
-        if self._view_cache is None:
-            self._view_cache = self._view_design_doc.views()
-        return next(iter([v for v in self._view_cache if v.name==view]), None)
+        if not self._view_cache:
+            # patch is not necessary
+            if not self._view_design_doc.name.startswith('dev_') or not self.full_set:
+                self._view_cache = self._view_design_doc.views()
+            # patch'em all
+            else:
+                def results(instance, params={}):
+                    if 'full_set' not in params:
+                        params['full_set'] = True
+                    return instance._results(params)
+                self._view_cache = list()
+                from couchbase.client import View
+                for view in self._view_design_doc.views():
+                    func_type = type(view.results)
+                    view._results = view.results
+                    view.results = func_type(results, view, View)
+                    self._view_cache.append(view)
+        return next(iter([v for v in self._view_cache if v.name==view_name]), None)
 
     def _fetch_data(self, get_lock=False):
         try:

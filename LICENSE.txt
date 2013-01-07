@@ -1,4 +1,4 @@
-Copyright 2012 Roy Enjoy <kirpit *at* gmail.com>
+Copyright 2013 Roy Enjoy <kirpit *at* gmail.com>
 https://github.com/kirpit/couchbasekit
 
 Permission is hereby granted, free of charge, to any person obtaining

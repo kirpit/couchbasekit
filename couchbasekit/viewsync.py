@@ -4,7 +4,7 @@ couchbasekit.viewsync
 ~~~~~~~~~~~~~~~~~~~~~
 
 :website: http://github.com/kirpit/couchbasekit
-:copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
+:copyright: Copyright 2013, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
 :license: MIT, see LICENSE.txt for details.
 """
 import os
@@ -13,7 +13,7 @@ from couchbase.exception import BucketUnavailableException
 from couchbasekit import Connection, Document
 
 
-def register_view(design_doc):
+def register_view(design_doc, full_set=True):
     """Model document decorator to register its design document view::
 
         @register_view('dev_books')
@@ -26,11 +26,14 @@ def register_view(design_doc):
 
     :param design_doc: The name of the design document.
     :type design_doc: basestring
+    :param full_set: Attach full_set param to development views.
+    :type full_set: bool
     """
     def _injector(doc):
         if not isinstance(doc, type) or not issubclass(doc, Document):
             raise TypeError("Class must be a couchbasekit 'Document' subclass.")
         doc.__view_name__ = design_doc
+        doc.dev_full_set = full_set
         ViewSync._documents.add(doc)
         return doc
     return _injector

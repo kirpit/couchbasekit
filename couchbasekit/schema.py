@@ -4,7 +4,7 @@ couchbasekit.schema
 ~~~~~~~~~~~~~~~~~~~
 
 :website: http://github.com/kirpit/couchbasekit
-:copyright: Copyright 2012, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
+:copyright: Copyright 2013, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
 :license: MIT, see LICENSE.txt for details.
 """
 from abc import ABCMeta

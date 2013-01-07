@@ -4,6 +4,8 @@ Changelog
 Release v0.2.2-dev
 --------------------
 * Caching bucket objects at Connection layer rather than Document layer
+* Auto ``'full_set': True`` feature with ``@register_view`` decorator
+* Implemented missing ``__ne__`` comparison magic function for Document and CustomField
 
 Release v0.2.1
 --------------------
@@ -22,7 +24,7 @@ Release v0.2.0
 
 Release v0.1.2
 --------------------
-* Include *.rst files to prevent setup fail
+* Include .rst files to prevent setup fail
 * Fix None value skipping in retrieved documents
 * Unicode encoding of CustomField values
 
