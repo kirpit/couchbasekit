@@ -110,11 +110,11 @@ Then it becomes easier to get your view queries. Please refer to CouchBase
 views documentation for advanced query options::
 
     >>> by_title = Book().view('by_title').results({
-            'startkey': 'A',
-            'endkey': 'C',
-            'stale': 'ok',
-            'limit': 1000,
-        })
+    ...     'startkey': 'A',
+    ...     'endkey': 'C',
+    ...     'stale': 'ok',
+    ...     'limit': 1000,
+    ... })
     >>> for result in by_title.results:
     ...     print result['id'], result['key'], result['value']
 

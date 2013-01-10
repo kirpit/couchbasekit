@@ -33,7 +33,7 @@ def register_view(design_doc, full_set=True):
         if not isinstance(doc, type) or not issubclass(doc, Document):
             raise TypeError("Class must be a couchbasekit 'Document' subclass.")
         doc.__view_name__ = design_doc
-        doc.dev_full_set = full_set
+        doc.full_set = full_set
         ViewSync._documents.add(doc)
         return doc
     return _injector

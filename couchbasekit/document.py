@@ -121,8 +121,7 @@ class Document(SchemaDocument):
             or design document otherwise.
         :type view_name: str
         :returns: couchbase design document, couchbase view or None
-        :rtype: :class:`couchbase.client.DesignDoc` or
-            :class:`couchbase.client.View` or None
+        :rtype: :class:`couchbase.client.View` or :class:`couchbase.client.DesignDoc` or None
         """
         if self.__view_name__ is None:
             return None
