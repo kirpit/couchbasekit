@@ -37,7 +37,7 @@ JavaScript views to check which type of documents you want to emit::
 
 Another function of ``doc_type`` is to prefix your document id, if you're
 using ``__key_field__`` optional attribute in order to create meaningful
-document IDs. It's format is; ``{doc_type}_{key_value.lower()}``. If you don't
+document IDs. Its format is; ``{doc_type}_{key_value.lower()}``. If you don't
 choose to use ``__key_field__`` in your models, ``doc_type`` will not be used
 to prefix your document IDs either.
 

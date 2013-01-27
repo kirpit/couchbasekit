@@ -173,15 +173,7 @@ class SchemaDocument(dict):
         [getattr(self, k) for k in self.iterkeys()]
         return self
 
-    def _validate(self, structure, mapping, root=False):
-        # if root, check the required fields first
-        if root is True:
-            for rfield in self.required_fields:
-                if (rfield not in mapping and rfield not in self.default_values) or \
-                   (rfield in mapping and mapping[rfield] is None):
-                    raise self.StructureError(
-                        msg="Required field for '%s' is missing." % rfield
-                    )
+    def _validate(self, structure, mapping):
         # check the dict structure
         for skey, svalue in structure.iteritems():
             # STRUCTURE KEY (FIELD) IS A TYPE
@@ -263,8 +255,7 @@ class SchemaDocument(dict):
                     continue
             # it's a dictionary instance, check recursively
             elif isinstance(svalue, dict) and \
-                 isinstance(mapping[skey], dict) and \
-                 len(mapping[skey]):
+                 isinstance(mapping[skey], dict):
                 if self._validate(svalue, mapping[skey]):
                     continue
             # houston, we got a problem!
@@ -284,4 +275,11 @@ class SchemaDocument(dict):
         if self.__key_field__ and self.__key_field__ not in self:
             raise self.StructureError(msg="Key field '%s' is defined "
                                           "but not provided." % self.__key_field__)
-        return self._validate(self.structure, self, root=True)
+        # check the required fields first
+        for required in self.required_fields:
+            if (required not in self and required not in self.default_values) or \
+               (required in self and self[required] is None):
+                raise self.StructureError(
+                    msg = "Required field for '%s' is missing." % required
+                )
+        return self._validate(self.structure, self)

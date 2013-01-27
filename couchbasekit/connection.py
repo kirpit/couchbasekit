@@ -72,8 +72,7 @@ class Connection(object):
         :type bucket_name: str
         :returns: couchbase driver's Bucket object.
         :rtype: :class:`couchbase.client.Bucket`
-        :raises: :exc:`couchbasekit.errors.CredentialsNotSetError` If the
-            credentials wasn't set.
+        :raises: :exc:`RuntimeError` If the credentials wasn't set.
         """
         if cls.connection is None:
             if cls.username is None or cls.password is None:

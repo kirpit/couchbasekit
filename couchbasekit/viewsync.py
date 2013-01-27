@@ -92,7 +92,10 @@ class ViewSync(object):
             # iterate viewtypes (i.e. spatial and views)
             for view_type, views in design_doc.ddoc.iteritems():
                 save_dir = '%s/%s/%s' % (bucket_name, design_doc.name, view_type)
-                os.makedirs(save_dir)
+                try:
+                    os.makedirs(save_dir)
+                except OSError:
+                    pass
                 for name, view in views.iteritems():
                     if isinstance(view, unicode) and view_type=='spatial':
                         spatial_file = '%s/%s.spatial.js' % (save_dir, name)
