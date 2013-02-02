@@ -76,13 +76,10 @@ class ViewSync(object):
         """Downloads all the views from server for the registered model
         documents into the defined :attr:`VIEW_PATHS` directory.
 
-        This method **removes everything** under :attr:`VIEW_PATHS` folder.
+        This method **removes** previous views directory if exist.
         """
         cls._check_folder()
         os.chdir(cls.VIEWS_PATH)
-        # remove everything first
-        for item in os.listdir(cls.VIEWS_PATH):
-            shutil.rmtree(item, ignore_errors=True)
         # iterate documents
         for doc in cls._documents:
             design_doc = doc().view()
@@ -93,6 +90,8 @@ class ViewSync(object):
             for view_type, views in design_doc.ddoc.iteritems():
                 save_dir = '%s/%s/%s' % (bucket_name, design_doc.name, view_type)
                 try:
+                    # remove and recreate the dir
+                    shutil.rmtree(save_dir, ignore_errors=True)
                     os.makedirs(save_dir)
                 except OSError:
                     pass
