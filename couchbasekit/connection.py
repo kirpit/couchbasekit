@@ -7,6 +7,7 @@ couchbasekit.connection
 :copyright: Copyright 2013, Roy Enjoy <kirpit *at* gmail.com>, see AUTHORS.txt.
 :license: MIT, see LICENSE.txt for details.
 """
+from threading import Lock
 from couchbase import Couchbase
 
 
@@ -34,6 +35,7 @@ class Connection(object):
 
        or you will get a :exc:`RuntimeWarning`.
     """
+    lock = Lock()
     username = None
     password = None
     server = None
@@ -62,7 +64,6 @@ class Connection(object):
         cls.username = username
         cls.password = password
         cls.server = ':'.join((server, port))
-        cls.close()
 
     @classmethod
     def bucket(cls, bucket_name):
@@ -74,14 +75,16 @@ class Connection(object):
         :rtype: :class:`couchbase.client.Bucket`
         :raises: :exc:`RuntimeError` If the credentials wasn't set.
         """
+        cls.lock.acquire()
         if cls.connection is None:
             if cls.username is None or cls.password is None:
                 raise RuntimeError("CouchBase credentials are not set to connect.")
             cls.connection = Couchbase(cls.server, cls.username, cls.password)
-        # cache cache $cash$
         if bucket_name not in cls._buckets:
             cls._buckets[bucket_name] = cls.connection.bucket(bucket_name)
-        return cls._buckets[bucket_name]
+        bucket = cls._buckets[bucket_name]
+        cls.lock.release()
+        return bucket
 
     @classmethod
     def close(cls):
@@ -96,6 +99,9 @@ class Connection(object):
         :returns: None
         """
         if cls.connection is not None:
+            cls.lock.acquire()
             try: cls.connection.done()
             except AttributeError: pass
+            cls._buckets = {}
             cls.connection = None
+            cls.lock.release()
