@@ -212,12 +212,12 @@ class Document(SchemaDocument):
             data[key] = self._encode_item(value)
         return data
 
-    def save(self, expiry=0):
+    def save(self, expiration=0):
         """Saves the current instance after validating it.
 
-        :param expiry: Expiration in seconds for the document to be removed by
+        :param expiration: Expiration in seconds for the document to be removed by
             couchbase server, defaults to 0 - will never expire.
-        :type expiry: int
+        :type expiration: int
         :returns: couchbase document CAS value
         :rtype: int
         :raises: :exc:`couchbasekit.errors.StructureError`,
@@ -237,7 +237,7 @@ class Document(SchemaDocument):
         if self.doc_id is None:
             self._hashed_key = hashlib.sha1(json_data).hexdigest()[0:12]
         # finally
-        self.cas_value = self.bucket.set(self.doc_id, expiry, 0, json_data)[1]
+        self.cas_value = self.bucket.set(self.doc_id, expiration, 0, json_data)[1]
         return self.cas_value
 
     def delete(self):
@@ -251,3 +251,18 @@ class Document(SchemaDocument):
         if not self.cas_value or not self.doc_id:
             raise self.DoesNotExist(self)
         return self.bucket.delete(self.doc_id, self.cas_value)
+
+    def touch(self, expiration):
+        """Updates the current document's expiration value.
+
+        :param expiration: Expiration in seconds for the document to be removed by
+            couchbase server, defaults to 0 - will never expire.
+        :type expiration: int
+        :returns: Response from CouchbaseClient.
+        :rtype: unicode
+        :raises: :exc:`couchbasekit.errors.DoesNotExist` or
+            :exc:`couchbase.exception.MemcachedError`
+        """
+        if not self.cas_value or not self.doc_id:
+            raise self.DoesNotExist(self)
+        return self.bucket.touch(self.doc_id, expiration)
