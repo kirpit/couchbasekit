@@ -9,6 +9,7 @@ couchbasekit.middlewares
 """
 from couchbasekit import Connection
 
+
 class CouchbasekitMiddleware(object):
     """A helper that can be used in Django Middlewares to close couchbase
     connection gracefully in order not leave any orphan subprocess behind.

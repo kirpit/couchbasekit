@@ -62,6 +62,7 @@ class Connection(object):
         cls.username = username
         cls.password = password
         cls.server = ':'.join((server, port))
+        cls.close()
 
     @classmethod
     def bucket(cls, bucket_name):
@@ -79,8 +80,7 @@ class Connection(object):
             cls.connection = Couchbase(cls.server, cls.username, cls.password)
         if bucket_name not in cls._buckets:
             cls._buckets[bucket_name] = cls.connection.bucket(bucket_name)
-        bucket = cls._buckets[bucket_name]
-        return bucket
+        return cls._buckets[bucket_name]
 
     @classmethod
     def close(cls):

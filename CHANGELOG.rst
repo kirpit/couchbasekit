@@ -1,11 +1,12 @@
 Changelog
 =========
 
-Release v0.2.2-dev
+Release v0.2.2
 --------------------
 * Caching bucket objects at Connection layer rather than Document layer
 * Auto ``'full_set': True`` feature with ``@register_view`` decorator
 * Implemented missing ``__ne__`` comparison magic function for Document and CustomField
+* Minor email validation fix from Django 1.5.1
 
 Release v0.2.1
 --------------------

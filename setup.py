@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name = 'couchbasekit',
-    version = '0.2.2-dev',
+    version = '0.2.2',
     author = 'Roy Enjoy',
     author_email = 'kirpit@gmail.com',
     packages = ['couchbasekit'],
