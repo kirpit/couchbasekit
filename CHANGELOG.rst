@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Release v0.2.2
+Release v0.2.3-dev
 --------------------
 * Caching bucket objects at Connection layer rather than Document layer
 * Auto ``'full_set': True`` feature with ``@register_view`` decorator
