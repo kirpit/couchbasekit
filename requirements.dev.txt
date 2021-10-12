@@ -6,7 +6,7 @@ couchbase==0.8.1
 docutils==0.9.1
 ipython==0.13.1
 jsonpickle==0.4.0
-py-bcrypt==0.2
+py-bcrypt==0.3
 python-dateutil==2.1
 readline==6.2.4.1
 requests==0.14.2
