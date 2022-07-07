@@ -9,7 +9,7 @@ jsonpickle==0.4.0
 py-bcrypt==0.2
 python-dateutil==2.1
 readline==6.2.4.1
-requests==0.14.2
+requests==2.20.0
 six==1.2.0
 unittest2==0.5.1
 uuid==1.30
